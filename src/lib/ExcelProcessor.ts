@@ -1,21 +1,36 @@
 import * as XLSX from "xlsx";
 
 export class ExcelProcessor {
-  private file: File;
+  private file: File | null;
   private headerRowNumber: number; // row number dimulai dari 1
   private workbook: XLSX.WorkBook | null = null;
   private sheet: XLSX.WorkSheet | null = null;
   private headerRowIndex: number = -1;
   private data: any[][] = [];
 
-  constructor(file: File, headerRowNumber: number) {
-    this.file = file;
+  constructor(headerRowNumber: number, file?: File) {
+    this.file = file ?? null;
     this.headerRowNumber = headerRowNumber;
   }
 
+  /** load dari File object (misalnya input <input type="file">) */
   async load(): Promise<void> {
+    if (!this.file) throw new Error("File tidak tersedia");
+
     const data = await fileToArrayBuffer(this.file);
-    this.workbook = XLSX.read(data, { type: "array" });
+    this.processWorkbook(data);
+  }
+
+  /** load dari URL (misalnya public/template.xlsx) */
+  async loadFromUrl(url: string): Promise<void> {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Gagal fetch file dari ${url}`);
+    const buf = await res.arrayBuffer();
+    this.processWorkbook(buf);
+  }
+
+  private processWorkbook(buf: ArrayBuffer) {
+    this.workbook = XLSX.read(buf, { type: "array" });
 
     const sheetName = this.workbook.SheetNames[0];
     this.sheet = this.workbook.Sheets[sheetName];
@@ -24,10 +39,7 @@ export class ExcelProcessor {
     // convert rowNumber (1-based) ke index array (0-based)
     this.headerRowIndex = this.headerRowNumber - 1;
 
-    if (
-      this.headerRowIndex < 0 ||
-      this.headerRowIndex >= this.data.length
-    ) {
+    if (this.headerRowIndex < 0 || this.headerRowIndex >= this.data.length) {
       throw new Error(
         `Header row number ${this.headerRowNumber} tidak valid`
       );
