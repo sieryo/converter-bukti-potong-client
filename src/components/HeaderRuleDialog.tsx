@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useRuleStore, type Rule } from "@/store/useRuleStore";
+import { useProfileStore } from "@/store/useProfileStore";
+import { mapProfileToLabel } from "@/utils/helper";
 
 /* ---------- CLAUSES CONFIG ---------- */
 const CLAUSES = [
@@ -54,13 +56,13 @@ const FORMULAS = [
   { id: "yesterday", label: "Kemarin" },
   { id: "bulan_sekarang", label: "Bulan Sekarang" },
   { id: "bulan_sebelumnya", label: "Bulan Sebelumnya" },
+  { id: "tahun_sekarang", label: "Tahun Sekarang" },
 ] as const;
 
 interface HeaderRuleDialogProps {
   headerName: string;
   header: string[];
   bukpotHeader: string[];
-  globalConfig?: string[];
   isOpen: boolean;
   setIsOpen: (val: boolean) => void;
 }
@@ -68,47 +70,82 @@ interface HeaderRuleDialogProps {
 export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
   headerName,
   bukpotHeader,
-  globalConfig = ["tanggal_awal_pajak", "cutoff_date"],
   isOpen,
   setIsOpen,
 }) => {
   const { addRule, rules } = useRuleStore();
+  const profile = useProfileStore((s) => s.getActiveProfile)();
 
-  const [sourceType, setSourceType] = useState<"bukpot" | "global">("bukpot");
+  const [sourceType, setSourceType] = useState<"bukpot" | "profil">("bukpot");
   const [selectedField, setSelectedField] = useState("");
   const [selectedClause, setSelectedClause] = useState("");
   const [clauseValue, setClauseValue] = useState("");
   const [selectedAction, setSelectedAction] = useState("");
   const [actionValue, setActionValue] = useState("");
+  const [ruleType, setRuleType] = useState<"conditional" | "direct">(
+    "conditional"
+  );
 
-  const fieldOptions = sourceType === "bukpot" ? bukpotHeader : globalConfig;
+  if (!profile) {
+    return null;
+  }
+
+  console.log(profile);
+
+  const profileOptions = mapProfileToLabel(profile);
+
+  const fieldOptions = sourceType === "bukpot" ? bukpotHeader : profileOptions;
   const existingRules = rules.filter((f) => f.header === headerName);
 
   const handleSave = () => {
-    if (!selectedField || !selectedClause || !selectedAction) {
-      alert("Lengkapi semua bagian rule dulu");
-      return;
+    if (ruleType === "conditional") {
+      if (!selectedField || !selectedClause || !selectedAction) {
+        alert("Lengkapi semua bagian rule dulu");
+        return;
+      }
+
+      const clauseConfig = CLAUSES.find((c) => c.id === selectedClause);
+      const actionConfig = ACTIONS.find((a) => a.id === selectedAction);
+
+      const newRule: Rule = {
+        type: "conditional",
+        when: {
+          source: sourceType,
+          field: selectedField,
+          clause: selectedClause,
+          value: clauseConfig?.needsValue ? clauseValue : undefined,
+        },
+        then: {
+          type: selectedAction,
+          value: actionConfig?.id === "set_value" ? actionValue : undefined,
+          fromField:
+            actionConfig?.id === "copy_field" ? actionValue : undefined,
+          formula: actionConfig?.id === "formula" ? actionValue : undefined,
+        },
+      };
+
+      addRule(headerName, newRule);
+    } else {
+      if (!selectedAction) {
+        alert("Pilih aksi dulu");
+        return;
+      }
+
+      const actionConfig = ACTIONS.find((a) => a.id === selectedAction);
+
+      const newRule: Rule = {
+        type: "direct",
+        then: {
+          type: selectedAction,
+          value: actionConfig?.id === "set_value" ? actionValue : undefined,
+          fromField:
+            actionConfig?.id === "copy_field" ? actionValue : undefined,
+          formula: actionConfig?.id === "formula" ? actionValue : undefined,
+        },
+      };
+
+      addRule(headerName, newRule);
     }
-
-    const clauseConfig = CLAUSES.find((c) => c.id === selectedClause);
-    const actionConfig = ACTIONS.find((a) => a.id === selectedAction);
-
-    const newRule: Rule = {
-      when: {
-        source: sourceType,
-        field: selectedField,
-        clause: selectedClause,
-        value: clauseConfig?.needsValue ? clauseValue : undefined,
-      },
-      then: {
-        type: selectedAction,
-        value: actionConfig?.id === "set_value" ? actionValue : undefined,
-        fromField: actionConfig?.id === "copy_field" ? actionValue : undefined,
-        formula: actionConfig?.id === "formula" ? actionValue : undefined,
-      },
-    };
-
-    addRule(headerName, newRule);
 
     // Reset
     setSourceType("bukpot");
@@ -151,19 +188,33 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
               >
                 {r.rules.map((rule, j) => (
                   <div key={j} className="flex items-start gap-1">
-                    <span className="font-medium text-gray-700">When:</span>
-                    <span>
-                      {rule.when.field} ({rule.when.clause}
-                      {rule.when.value ? ` ${rule.when.value}` : ""})
-                    </span>
-                    <span className="mx-1 text-gray-400">→</span>
-                    <span className="font-medium text-gray-700">Then:</span>
-                    <span>
-                      {rule.then.type}{" "}
-                      {rule.then.value ||
-                        rule.then.fromField ||
-                        rule.then.formula}
-                    </span>
+                    {rule.type === "conditional" ? (
+                      <>
+                        <span className="font-medium text-gray-700">When:</span>
+                        <span>
+                          {rule.when.field} ({rule.when.clause}
+                          {rule.when.value ? ` ${rule.when.value}` : ""})
+                        </span>
+                        <span className="mx-1 text-gray-400">→</span>
+                        <span className="font-medium text-gray-700">Then:</span>
+                        <span>
+                          {rule.then.type}{" "}
+                          {rule.then.value ||
+                            rule.then.fromField ||
+                            rule.then.formula}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-medium text-gray-700">Then:</span>
+                        <span>
+                          {rule.then.type}{" "}
+                          {rule.then.value ||
+                            rule.then.fromField ||
+                            rule.then.formula}
+                        </span>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
@@ -176,6 +227,28 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
           <h3 className="text-sm font-medium text-gray-600">
             Tambah Rule Baru
           </h3>
+          <p className="text-xs text-gray-500 italic">
+            Mengganti section dari bukti potong menjadi profil akan mengubah
+            field sumber aksi.
+          </p>
+          <div className="flex items-center gap-4 mb-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                checked={ruleType === "conditional"}
+                onChange={() => setRuleType("conditional")}
+              />
+              Dengan Kondisi (WHEN/THEN)
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                checked={ruleType === "direct"}
+                onChange={() => setRuleType("direct")}
+              />
+              Tanpa Kondisi (Direct THEN)
+            </label>
+          </div>
 
           {/* WHEN */}
           <div className="p-4 border rounded-xl bg-gray-50 space-y-3">
@@ -185,14 +258,14 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
             <div className="flex flex-wrap gap-2 items-center">
               <Select
                 value={sourceType}
-                onValueChange={(v: "bukpot" | "global") => setSourceType(v)}
+                onValueChange={(v: "bukpot" | "profil") => setSourceType(v)}
               >
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="Sumber" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="bukpot">Bukti Potong</SelectItem>
-                  <SelectItem value="global">Global</SelectItem>
+                  <SelectItem value="profil">Profil</SelectItem>
                 </SelectContent>
               </Select>
 

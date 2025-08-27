@@ -1,9 +1,38 @@
 import { create } from "zustand";
 
 
+export type Source =  "bukpot" | "profil"
+
+type ConditionalRule = {
+  type: "conditional";
+  when: {
+    source: Source;
+    field: string;
+    clause: string;
+    value?: string;
+  };
+  then: {
+    type: string;
+    value?: string;
+    fromField?: string;
+    formula?: string;
+  };
+};
+
+type DirectRule = {
+  type: "direct";
+  then: {
+    type: string;
+    value?: string;
+    fromField?: string;
+    formula?: string;
+  };
+};
+
+
 
 export interface RuleCondition {
-  source: "bukpot" | "global";
+  source: Source;
   field: string;
   clause: string;
   value?: string;
@@ -16,10 +45,7 @@ export interface RuleAction {
   formula?: string; // for formula
 }
 
-export interface Rule {
-  when: RuleCondition;
-  then: RuleAction;
-}
+export type Rule = ConditionalRule | DirectRule;
 
 export interface RuleSet {
   header: string;

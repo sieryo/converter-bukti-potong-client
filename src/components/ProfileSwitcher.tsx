@@ -87,6 +87,10 @@ export default function ProfileSwitcher() {
                   <span className="font-medium">NPWP</span>
                   <span>{selectedProfile.npwp}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">ID TKU</span>
+                  <span>{selectedProfile.tku_no}</span>
+                </div>
               </div>
 
               <DrawerFooter className="flex flex-row justify-between gap-4">

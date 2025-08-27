@@ -6,6 +6,7 @@ export type Profile = {
   alias: string;
   cutoffDate: number;
   npwp: string;
+  idTKU: string
 };
 
 type ProfileState = {

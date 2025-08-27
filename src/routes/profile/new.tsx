@@ -20,12 +20,14 @@ function ProfileNewPage() {
       alias: "",
       cutoffDate: "",
       npwp: "",
+      idTKU: "",
     },
     onSubmit: ({ value }) => {
       addProfile({
         alias: value.alias,
         cutoffDate: Number(value.cutoffDate),
         npwp: value.npwp,
+        idTKU: value.idTKU
       });
       router.navigate({ to: "/" });
     },
@@ -100,6 +102,18 @@ function ProfileNewPage() {
                 <div>
                   <Input
                     placeholder="NPWP"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                  />
+                </div>
+              )}
+            />
+            <form.Field
+              name="idTKU"
+              children={(field) => (
+                <div>
+                  <Input
+                    placeholder="ID TKU"
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                   />

@@ -21,12 +21,13 @@ function RouteComponent() {
   const [rows, setRows] = useState<any[][]>([]);
   const { rules } = useRuleStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [bukpotFile, setBukpotFile] = useState<File | null>(null);
 
   const [selectedHeader, setSelectedHeader] = useState<string | null>(null);
 
   useEffect(() => {
     const loadExcel = async () => {
-      const processor = new ExcelProcessor(3); // header di row ke-2
+      const processor = new ExcelProcessor(3); // header di row ke-3
       await processor.loadFromUrl("/template.xlsx");
       setHeader(processor.getHeader());
       setRows(processor.getRows());
@@ -37,6 +38,8 @@ function RouteComponent() {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setBukpotFile(file)
 
     const processor = new ExcelProcessor(2, file);
     await processor.load();
@@ -51,7 +54,6 @@ function RouteComponent() {
         direction="vertical"
         className="w-full h-full rounded-lg border shadow-sm"
       >
-        {/* TOP PANEL: HEADER TEMPLATE */}
         <ResizablePanel defaultSize={60} minSize={40}>
           <div className="h-full p-4 flex flex-col">
             <h2 className="text-lg font-semibold mb-3">Template Headers</h2>
