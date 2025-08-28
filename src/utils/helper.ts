@@ -2,7 +2,7 @@ import type { Profile } from "@/store/useProfileStore";
 
 export const mapProfileToLabel = (profile: Profile | {}) => {
   const result = Object.entries(profile || {})
-    .filter(([key]) => !["id", "alias"].includes(key))
+    .filter(([key]) => !["id"].includes(key))
     .map(([key]) => {
       let label = key;
 
@@ -16,6 +16,8 @@ export const mapProfileToLabel = (profile: Profile | {}) => {
         case "idTKU":
           label = "ID TKU Pemotong";
           break;
+        case "alias":
+          label = "Alias";
       }
 
       return label;

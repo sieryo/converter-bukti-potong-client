@@ -43,7 +43,7 @@ const ACTIONS = [
   { id: "set_value", label: "Set Value", needsValue: true, valueType: "text" },
   {
     id: "copy_field",
-    label: "Copy Dari Field",
+    label: "Copy Value dari Field",
     needsValue: true,
     valueType: "select",
   },
@@ -62,18 +62,18 @@ const FORMULAS = [
 interface HeaderRuleDialogProps {
   headerName: string;
   header: string[];
-  bukpotHeader: string[];
+  bukpotOptions: string[];
   isOpen: boolean;
   setIsOpen: (val: boolean) => void;
 }
 
 export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
   headerName,
-  bukpotHeader,
+  bukpotOptions,
   isOpen,
   setIsOpen,
 }) => {
-  const { addRule, rules } = useRuleStore();
+  const { fieldRules, addFieldRule } = useRuleStore();
   const profile = useProfileStore((s) => s.getActiveProfile)();
 
   const [sourceType, setSourceType] = useState<"bukpot" | "profil">("bukpot");
@@ -85,6 +85,10 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
   const [ruleType, setRuleType] = useState<"conditional" | "direct">(
     "conditional"
   );
+  const [compareType, setCompareType] = useState("");
+  const [actionSourceType, setActionSourceType] = useState<"bukpot" | "profil">(
+    "bukpot"
+  );
 
   if (!profile) {
     return null;
@@ -94,8 +98,10 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
 
   const profileOptions = mapProfileToLabel(profile);
 
-  const fieldOptions = sourceType === "bukpot" ? bukpotHeader : profileOptions;
-  const existingRules = rules.filter((f) => f.header === headerName);
+  const fieldOptions = sourceType === "bukpot" ? bukpotOptions : profileOptions;
+  const actionFieldOptions =
+    actionSourceType === "bukpot" ? bukpotOptions : profileOptions;
+  const existingRules = fieldRules.filter((f) => f.header === headerName);
 
   const handleSave = () => {
     if (ruleType === "conditional") {
@@ -104,7 +110,6 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
         return;
       }
 
-      const clauseConfig = CLAUSES.find((c) => c.id === selectedClause);
       const actionConfig = ACTIONS.find((a) => a.id === selectedAction);
 
       const newRule: Rule = {
@@ -113,7 +118,10 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
           source: sourceType,
           field: selectedField,
           clause: selectedClause,
-          value: clauseConfig?.needsValue ? clauseValue : undefined,
+          compareWith: {
+            type: compareType,
+            value: clauseValue,
+          },
         },
         then: {
           type: selectedAction,
@@ -124,7 +132,7 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
         },
       };
 
-      addRule(headerName, newRule);
+      addFieldRule(headerName, newRule);
     } else {
       if (!selectedAction) {
         alert("Pilih aksi dulu");
@@ -144,7 +152,7 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
         },
       };
 
-      addRule(headerName, newRule);
+      addFieldRule(headerName, newRule);
     }
 
     // Reset
@@ -154,6 +162,8 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
     setClauseValue("");
     setSelectedAction("");
     setActionValue("");
+    setCompareType("");
+    setActionSourceType("bukpot");
   };
 
   return (
@@ -193,7 +203,10 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
                         <span className="font-medium text-gray-700">When:</span>
                         <span>
                           {rule.when.field} ({rule.when.clause}
-                          {rule.when.value ? ` ${rule.when.value}` : ""})
+                          {rule.when.compareWith.value
+                            ? ` ${rule.when.compareWith.value}`
+                            : ""}
+                          )
                         </span>
                         <span className="mx-1 text-gray-400">→</span>
                         <span className="font-medium text-gray-700">Then:</span>
@@ -222,14 +235,13 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
           )}
         </div>
 
-        {/* New rule builder */}
         <div className="space-y-4">
           <h3 className="text-sm font-medium text-gray-600">
             Tambah Rule Baru
           </h3>
           <p className="text-xs text-gray-500 italic">
-            Mengganti section dari bukti potong menjadi profil akan mengubah
-            field sumber aksi.
+            Field sumber aksi akan menyesuaikan saat section diganti dari Bukti
+            Potong menjadi Profil.
           </p>
           <div className="flex items-center gap-4 mb-4">
             <label className="flex items-center gap-2">
@@ -256,59 +268,155 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
               Kondisi (WHEN)
             </span>
             <div className="flex flex-wrap gap-2 items-center">
-              <Select
-                value={sourceType}
-                onValueChange={(v: "bukpot" | "profil") => setSourceType(v)}
-              >
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Sumber" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="bukpot">Bukti Potong</SelectItem>
-                  <SelectItem value="profil">Profil</SelectItem>
-                </SelectContent>
-              </Select>
+              <div>
+                <p className="text-xs text-gray-500 italic pl-2 pb-1">
+                  Pilih Field sumber
+                </p>
+                <div className=" flex flex-wrap gap-2">
+                  <Select
+                    value={sourceType}
+                    onValueChange={(v: "bukpot" | "profil") => setSourceType(v)}
+                  >
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder="Sumber" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="bukpot">Bukti Potong</SelectItem>
+                      <SelectItem value="profil">Profil</SelectItem>
+                    </SelectContent>
+                  </Select>
 
-              <Select value={selectedField} onValueChange={setSelectedField}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Pilih Field" />
-                </SelectTrigger>
-                <SelectContent>
-                  {fieldOptions.map((f, i) => (
-                    <SelectItem key={i} value={f}>
-                      {f}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <Select
+                    value={selectedField}
+                    onValueChange={setSelectedField}
+                  >
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Pilih Field" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {fieldOptions.map((f, i) => (
+                        <SelectItem key={i} value={f}>
+                          {f}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <Select value={selectedClause} onValueChange={setSelectedClause}>
-                <SelectTrigger className="w-[220px]">
-                  <SelectValue placeholder="Pilih Kondisi" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CLAUSES.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <div className=" ">
+                  <p className="text-xs text-gray-500 italic pl-2 pb-1">
+                    Pilih Kondisi
+                  </p>
+                  <div className=" flex flex-wrap gap-2">
+                    <div>
+                      <Select
+                        value={selectedClause}
+                        onValueChange={setSelectedClause}
+                      >
+                        <SelectTrigger className="w-[220px]">
+                          <SelectValue placeholder="Pilih Kondisi" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CLAUSES.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {selectedClause !== "" && (
+                <div>
+                  {[
+                    "equals",
+                    "not_equals",
+                    "greater_than",
+                    "less_equal",
+                  ].includes(selectedClause) && (
+                    <div>
+                      <p className="text-xs text-gray-500 italic pl-2 pb-1">
+                        Pilih Tipe Pembanding
+                      </p>
+                      <div className="flex flex-wrap gap-2 items-center">
+                        <Select
+                          value={compareType}
+                          onValueChange={(value) => {
+                            const v: any = value;
+                            setCompareType(v);
+                          }}
+                        >
+                          <SelectTrigger className="w-[200px]">
+                            <SelectValue placeholder="Tipe Pembanding" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="set_value">Set Value</SelectItem>
+                            <SelectItem value="bukpot_field">
+                              Bukti Potong
+                            </SelectItem>
+                            <SelectItem value="profil_field">Profil</SelectItem>
+                          </SelectContent>
+                        </Select>
 
-              {/* Dynamic input */}
-              {(() => {
-                const clauseCfg = CLAUSES.find((c) => c.id === selectedClause);
-                if (!clauseCfg?.needsValue) return null;
-                return (
-                  <Input
-                    type={clauseCfg.valueType}
-                    placeholder="Masukkan nilai"
-                    value={clauseValue}
-                    onChange={(e) => setClauseValue(e.target.value)}
-                    className="w-[140px]"
-                  />
-                );
-              })()}
+                        {(() => {
+                          const clauseCfg = CLAUSES.find(
+                            (c) => c.id === selectedClause
+                          );
+                          if (!clauseCfg?.needsValue) return null;
+                          if (compareType !== "set_value") return null;
+                          return (
+                            <Input
+                              type={clauseCfg.valueType}
+                              placeholder="Masukkan nilai"
+                              value={clauseValue}
+                              onChange={(e) => setClauseValue(e.target.value)}
+                              className="w-[140px]"
+                            />
+                          );
+                        })()}
+
+                        {compareType === "bukpot_field" && (
+                          <Select
+                            value={clauseValue}
+                            onValueChange={setClauseValue}
+                          >
+                            <SelectTrigger className="w-[200px]">
+                              <SelectValue placeholder="Pilih Field Bukpot" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {bukpotOptions.map((f, i) => (
+                                <SelectItem key={i} value={f}>
+                                  {f}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+
+                        {compareType === "profil_field" && (
+                          <Select
+                            value={clauseValue}
+                            onValueChange={setClauseValue}
+                          >
+                            <SelectTrigger className="w-[200px]">
+                              <SelectValue placeholder="Pilih Field Profil" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {profileOptions.map((f, i) => (
+                                <SelectItem key={i} value={f}>
+                                  {f}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -317,19 +425,26 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
             <span className="block text-xs uppercase text-gray-500 font-medium">
               Aksi (THEN)
             </span>
-            <div className="flex flex-wrap gap-2 items-center">
-              <Select value={selectedAction} onValueChange={setSelectedAction}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Pilih Aksi" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ACTIONS.map((a) => (
-                    <SelectItem key={a.id} value={a.id}>
-                      {a.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className=" space-y-3">
+              <div>
+                <div>
+                  <Select
+                    value={selectedAction}
+                    onValueChange={setSelectedAction}
+                  >
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Pilih Aksi" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ACTIONS.map((a) => (
+                        <SelectItem key={a.id} value={a.id}>
+                          {a.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
               {(() => {
                 const actionCfg = ACTIONS.find((a) => a.id === selectedAction);
@@ -337,46 +452,84 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
 
                 if (actionCfg.valueType === "text") {
                   return (
-                    <Input
-                      placeholder="Masukkan nilai"
-                      value={actionValue}
-                      onChange={(e) => setActionValue(e.target.value)}
-                      className="w-[220px]"
-                    />
+                    <div>
+                      <p className="text-xs text-gray-500 italic pl-2 pb-1">
+                        Value
+                      </p>
+                      <Input
+                        placeholder="Masukkan nilai"
+                        value={actionValue}
+                        onChange={(e) => setActionValue(e.target.value)}
+                        className="w-[220px]"
+                      />
+                    </div>
                   );
                 }
 
                 if (actionCfg.valueType === "select") {
                   return (
-                    <Select value={actionValue} onValueChange={setActionValue}>
-                      <SelectTrigger className="w-[220px]">
-                        <SelectValue placeholder="Pilih Field Sumber" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {fieldOptions.map((f, i) => (
-                          <SelectItem key={i} value={f}>
-                            {f}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div>
+                      <p className="text-xs text-gray-500 italic pl-2 pb-1">
+                        Value
+                      </p>
+                      <div className=" flex   gap-3">
+                        <Select
+                          value={actionSourceType}
+                          onValueChange={(v: "bukpot" | "profil") =>
+                            setActionSourceType(v)
+                          }
+                        >
+                          <SelectTrigger className="w-[200px]">
+                            <SelectValue placeholder="Pilih Section Sumber" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="bukpot">Bukti Potong</SelectItem>
+                            <SelectItem value="profil">Profil</SelectItem>
+                          </SelectContent>
+                        </Select>
+
+                        <Select
+                          value={actionValue}
+                          onValueChange={setActionValue}
+                        >
+                          <SelectTrigger className="w-[200px]">
+                            <SelectValue placeholder="Pilih Field Sumber" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {actionFieldOptions.map((f, i) => (
+                              <SelectItem key={i} value={f}>
+                                {f}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                   );
                 }
 
                 if (actionCfg.valueType === "formula") {
                   return (
-                    <Select value={actionValue} onValueChange={setActionValue}>
-                      <SelectTrigger className="w-[220px]">
-                        <SelectValue placeholder="Pilih Formula" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {FORMULAS.map((f) => (
-                          <SelectItem key={f.id} value={f.id}>
-                            {f.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div>
+                      <p className="text-xs text-gray-500 italic pl-2 pb-1">
+                        Value
+                      </p>
+                      <Select
+                        value={actionValue}
+                        onValueChange={setActionValue}
+                      >
+                        <SelectTrigger className="w-[220px]">
+                          <SelectValue placeholder="Pilih Formula" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {FORMULAS.map((f) => (
+                            <SelectItem key={f.id} value={f.id}>
+                              {f.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   );
                 }
 

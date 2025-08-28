@@ -1,16 +1,26 @@
 import { create } from "zustand";
 
+export type Source = "bukpot" | "profil";
 
-export type Source =  "bukpot" | "profil"
-
-type ConditionalRule = {
-  type: "conditional";
-  when: {
-    source: Source;
-    field: string;
-    clause: string;
+// --------------------
+// Row Filter
+// --------------------
+export interface RowFilter {
+  source: Source;
+  field: string;
+  clause: string;
+  compareWith: {
+    type: string;
     value?: string;
   };
+}
+
+// --------------------
+// Field Rules
+// --------------------
+type ConditionalRule = {
+  type: "conditional";
+  when: RowFilter;
   then: {
     type: string;
     value?: string;
@@ -29,22 +39,6 @@ type DirectRule = {
   };
 };
 
-
-
-export interface RuleCondition {
-  source: Source;
-  field: string;
-  clause: string;
-  value?: string;
-}
-
-export interface RuleAction {
-  type: string;
-  value?: string; // for set_value
-  fromField?: string; // for copy_field
-  formula?: string; // for formula
-}
-
 export type Rule = ConditionalRule | DirectRule;
 
 export interface RuleSet {
@@ -52,28 +46,57 @@ export interface RuleSet {
   rules: Rule[];
 }
 
+// --------------------
+// Zustand State
+// --------------------
 type RuleState = {
-  rules: RuleSet[];
-  addRule: (header: string, rule: Rule) => void;
+  rowFilters: RowFilter[];
+  fieldRules: RuleSet[];
+  addRowFilter: (filter: RowFilter) => void;
+  addFieldRule: (header: string, rule: Rule) => void;
+  removeRule: (header: string, index: number) => void;
   reset: () => void;
 };
 
 export const useRuleStore = create<RuleState>((set) => ({
-  rules: [],
-  addRule: (header, rule) =>
+  rowFilters: [],
+  fieldRules: [],
+
+  addRowFilter: (filter) =>
+    set((state) => ({
+      rowFilters: [...state.rowFilters, filter],
+    })),
+
+  addFieldRule: (header, rule) =>
     set((state) => {
-      const existingIndex = state.rules.findIndex((r) => r.header === header);
+      const existingIndex = state.fieldRules.findIndex(
+        (r) => r.header === header
+      );
 
       if (existingIndex !== -1) {
-        const updated = [...state.rules];
+        const updated = [...state.fieldRules];
         updated[existingIndex] = {
           ...updated[existingIndex],
           rules: [...updated[existingIndex].rules, rule],
         };
-        return { rules: updated };
+        return { fieldRules: updated };
       } else {
-        return { rules: [...state.rules, { header, rules: [rule] }] };
+        return {
+          fieldRules: [...state.fieldRules, { header, rules: [rule] }],
+        };
       }
     }),
-  reset: () => set({ rules: [] }),
+  removeRule: (header: string, ruleIndex: number) =>
+    set((state) => {
+      const updated = state.fieldRules.map((rs) => {
+        if (rs.header !== header) return rs;
+        return {
+          ...rs,
+          rules: rs.rules.filter((_, idx) => idx !== ruleIndex),
+        };
+      });
+      return { fieldRules: updated };
+    }),
+
+  reset: () => set({ rowFilters: [], fieldRules: [] }),
 }));

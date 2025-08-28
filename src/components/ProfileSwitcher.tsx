@@ -89,7 +89,7 @@ export default function ProfileSwitcher() {
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">ID TKU</span>
-                  <span>{selectedProfile.tku_no}</span>
+                  <span>{selectedProfile.idTKU}</span>
                 </div>
               </div>
 
