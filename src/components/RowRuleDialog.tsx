@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { useRuleStore, type RowFilter } from "@/store/useRuleStore";
 import { useProfileStore } from "@/store/useProfileStore";
 import { mapProfileToLabel } from "@/utils/helper";
+import { toast } from "sonner";
 
 /* ---------- CLAUSES CONFIG ---------- */
 const CLAUSES = [
@@ -95,8 +96,10 @@ export const RowRuleDialog: React.FC<RowRuleDialogProps> = ({
     setSelectedField("");
     setSelectedClause("");
     setClauseValue("");
-    setCompareType("")
-    setCompareValue("")
+    setCompareType("");
+    setCompareValue("");
+
+    toast.success("Filter berhasil ditambahkan!");
   };
 
   return (
@@ -124,8 +127,8 @@ export const RowRuleDialog: React.FC<RowRuleDialogProps> = ({
               >
                 <span className="font-medium text-gray-700">When:</span>{" "}
                 <span>
-                  {f.source}.{f.field} ({f.clause}) {" "}
-                  {f.compareWith.type}.{f.compareWith.value}
+                  {f.source}.{f.field} ({f.clause}) {f.compareWith.type}.
+                  {f.compareWith.value}
                 </span>
               </div>
             ))
@@ -221,9 +224,7 @@ export const RowRuleDialog: React.FC<RowRuleDialogProps> = ({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="set_value">Set Value</SelectItem>
-                          <SelectItem value="bukpot">
-                            Bukti Potong
-                          </SelectItem>
+                          <SelectItem value="bukpot">Bukti Potong</SelectItem>
                           <SelectItem value="profil">Profil</SelectItem>
                         </SelectContent>
                       </Select>

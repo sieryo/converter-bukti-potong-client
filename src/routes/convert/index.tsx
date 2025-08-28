@@ -25,6 +25,8 @@ import PromptAlertDialog from "@/components/PromptAlertDialog";
 import { handleExport } from "@/utils/helper";
 import { ImportRuleDialog } from "@/components/ImportRuleDialog";
 import { toast } from "sonner";
+import { ProfilePreview } from "@/components/ProfilePreview";
+import RuleDescription from "@/components/RuleDescription";
 
 export const Route = createFileRoute("/convert/")({
   component: RouteComponent,
@@ -80,7 +82,7 @@ function RouteComponent() {
 
     if (isValid) {
       setIsBukpotHeaderValid(BukpotHeaderState.VALID);
-      toast.success("Header Bukti Potong Terdeteksi")
+      toast.success("Header Bukti Potong Terdeteksi");
     } else {
       setIsBukpotHeaderValid(BukpotHeaderState.NOT_VALID);
     }
@@ -153,6 +155,9 @@ function RouteComponent() {
 
   return (
     <div className="h-screen p-4">
+      <div className="w-full pb-3">
+        <h1 className=" text-xl">Converter Bukti Potong</h1>
+      </div>
       <ResizablePanelGroup
         direction="horizontal"
         className="w-full h-full rounded-lg border shadow-sm"
@@ -204,7 +209,7 @@ function RouteComponent() {
           <div className=" p-4 flex flex-col gap-6 overflow-y-auto">
             <div>
               <div className="flex justify-between items-center mb-2">
-                <h2 className="text-lg font-semibold">Row Filters</h2>
+                <h2 className="text-lg font-semibold">Bukpot Row Filters</h2>
                 <Button
                   size="sm"
                   variant="ghost"
@@ -281,24 +286,12 @@ function RouteComponent() {
                     ) : (
                       <ul className="mt-2 space-y-1">
                         {rules.map((r, idx) => {
-                          let descriptions;
-
-                          if (r.type === "conditional") {
-                            descriptions = `When "${r.when.field}" ${r.when.clause}, then ${r.then.action} ${
-                              r.then.formula ? `${r.then.formula} ` : ""
-                            }${r.then.value ?? ""} ${r.then.from ? `from "${r.then.from.source}.${r.then.from.field}"` : ""}`;
-                          } else if (r.type === "direct") {
-                            descriptions = `Always ${r.then.action} ${
-                              r.then.formula ? `"${r.then.formula}" ` : ""
-                            }${r.then.value ? `"${r.then.value}"` : ""} ${r.then.from ? `from "${r.then.from.source}.${r.then.from.field}"` : ""}`;
-                          }
-
                           return (
                             <li
                               key={idx}
                               className="flex items-center justify-between text-sm bg-gray-50 px-2 py-1 rounded"
                             >
-                              <span>{descriptions}</span>
+                              <RuleDescription rule={r} />
                               <PromptAlertDialog
                                 title="Apakah kamu yakin untuk menghapus rule ini?"
                                 description="Rule yang dihapus tidak akan kembali dan harus dibuat lagi."
@@ -322,23 +315,29 @@ function RouteComponent() {
 
         {/* RIGHT: Actions */}
         <ResizablePanel defaultSize={30} minSize={20}>
-          <div className="h-full p-4 flex flex-col gap-4">
-            <h2 className="text-lg font-semibold mb-2">Aksi</h2>
-            <div className="flex flex-col gap-2">
-              <Button className="flex items-center gap-2">
-                <Play className="w-4 h-4" /> Convert
-              </Button>
-              <ImportRuleDialog />
-              <Button
-                onClick={() => {
-                  const exportedRules = exportAll();
-                  handleExport(exportedRules);
-                }}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <Download className="w-4 h-4" /> Export Rules
-              </Button>
+          <div className="h-full p-4 flex flex-col">
+            <div className="flex flex-col gap-4">
+              <h2 className="text-lg font-semibold mb-2">Aksi</h2>
+              <div className="flex flex-col gap-2">
+                <Button className="flex items-center gap-2">
+                  <Play className="w-4 h-4" /> Convert
+                </Button>
+                <ImportRuleDialog />
+                <Button
+                  onClick={() => {
+                    const exportedRules = exportAll();
+                    handleExport(exportedRules);
+                  }}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4" /> Export Rules
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-auto">
+              <ProfilePreview />
             </div>
           </div>
         </ResizablePanel>

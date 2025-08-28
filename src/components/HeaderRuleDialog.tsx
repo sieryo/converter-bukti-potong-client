@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { useRuleStore, type Rule } from "@/store/useRuleStore";
 import { useProfileStore } from "@/store/useProfileStore";
 import { mapProfileToLabel } from "@/utils/helper";
+import { toast } from "sonner";
 
 /* ---------- CLAUSES CONFIG ---------- */
 const CLAUSES = [
@@ -108,7 +109,6 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
       }
 
       const actionConfig = ACTIONS.find((a) => a.id === selectedAction);
-      
 
       const fromField =
         actionConfig?.id === "copy_field"
@@ -176,6 +176,8 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
     setActionValue("");
     setCompareType("");
     setActionSourceType("bukpot");
+
+    toast.success("Rule berhasil ditambahkan!");
   };
 
   return (
@@ -367,9 +369,7 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
                               <SelectItem value="bukpot">
                                 Bukti Potong
                               </SelectItem>
-                              <SelectItem value="profil">
-                                Profil
-                              </SelectItem>
+                              <SelectItem value="profil">Profil</SelectItem>
                             </SelectContent>
                           </Select>
 
