@@ -93,7 +93,6 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
     return null;
   }
 
-
   const profileOptions = mapProfileToLabel(profile);
 
   const fieldOptions = sourceType === "bukpot" ? bukpotOptions : profileOptions;
@@ -109,6 +108,15 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
       }
 
       const actionConfig = ACTIONS.find((a) => a.id === selectedAction);
+      
+
+      const fromField =
+        actionConfig?.id === "copy_field"
+          ? {
+              source: actionSourceType,
+              field: actionValue,
+            }
+          : undefined;
 
       const newRule: Rule = {
         type: "conditional",
@@ -124,8 +132,7 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
         then: {
           action: selectedAction,
           value: actionConfig?.id === "set_value" ? actionValue : undefined,
-          fromField:
-            actionConfig?.id === "copy_field" ? actionValue : undefined,
+          from: fromField,
           formula: actionConfig?.id === "formula" ? actionValue : undefined,
         },
       };
@@ -139,13 +146,20 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
 
       const actionConfig = ACTIONS.find((a) => a.id === selectedAction);
 
+      const fromField =
+        actionConfig?.id === "copy_field"
+          ? {
+              source: actionSourceType,
+              field: actionValue,
+            }
+          : undefined;
+
       const newRule: Rule = {
         type: "direct",
         then: {
           action: selectedAction,
           value: actionConfig?.id === "set_value" ? actionValue : undefined,
-          fromField:
-            actionConfig?.id === "copy_field" ? actionValue : undefined,
+          from: fromField,
           formula: actionConfig?.id === "formula" ? actionValue : undefined,
         },
       };
@@ -205,7 +219,7 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
                         <span>
                           {rule.then.action}{" "}
                           {rule.then.value ||
-                            rule.then.fromField ||
+                            rule.then.from?.field ||
                             rule.then.formula}
                         </span>
                       </>
@@ -215,7 +229,7 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
                         <span>
                           {rule.then.action}{" "}
                           {rule.then.value ||
-                            rule.then.fromField ||
+                            rule.then.from?.field ||
                             rule.then.formula}
                         </span>
                       </>
@@ -255,162 +269,170 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
           </div>
 
           {/* WHEN */}
-          <div className="p-4 border rounded-xl bg-gray-50 space-y-3">
-            <span className="block text-xs uppercase text-gray-500 font-medium">
-              Kondisi (WHEN)
-            </span>
-            <div className="flex flex-wrap gap-2 items-center">
-              <div>
-                <p className="text-xs text-gray-500 italic pl-2 pb-1">
-                  Pilih Field sumber
-                </p>
-                <div className=" flex flex-wrap gap-2">
-                  <Select
-                    value={sourceType}
-                    onValueChange={(v: "bukpot" | "profil") => setSourceType(v)}
-                  >
-                    <SelectTrigger className="w-[140px]">
-                      <SelectValue placeholder="Sumber" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="bukpot">Bukti Potong</SelectItem>
-                      <SelectItem value="profil">Profil</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={selectedField}
-                    onValueChange={setSelectedField}
-                  >
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder="Pilih Field" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {fieldOptions.map((f, i) => (
-                        <SelectItem key={i} value={f}>
-                          {f}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className=" ">
+          {ruleType !== "direct" && (
+            <div className="p-4 border rounded-xl bg-gray-50 space-y-3">
+              <span className="block text-xs uppercase text-gray-500 font-medium">
+                Kondisi (WHEN)
+              </span>
+              <div className="flex flex-wrap gap-2 items-center">
+                <div>
                   <p className="text-xs text-gray-500 italic pl-2 pb-1">
-                    Pilih Kondisi
+                    Pilih Field sumber
                   </p>
                   <div className=" flex flex-wrap gap-2">
-                    <div>
-                      <Select
-                        value={selectedClause}
-                        onValueChange={setSelectedClause}
-                      >
-                        <SelectTrigger className="w-[220px]">
-                          <SelectValue placeholder="Pilih Kondisi" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {CLAUSES.map((c) => (
-                            <SelectItem key={c.id} value={c.id}>
-                              {c.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    <Select
+                      value={sourceType}
+                      onValueChange={(v: "bukpot" | "profil") =>
+                        setSourceType(v)
+                      }
+                    >
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue placeholder="Sumber" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="bukpot">Bukti Potong</SelectItem>
+                        <SelectItem value="profil">Profil</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Select
+                      value={selectedField}
+                      onValueChange={setSelectedField}
+                    >
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Pilih Field" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {fieldOptions.map((f, i) => (
+                          <SelectItem key={i} value={f}>
+                            {f}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className=" ">
+                    <p className="text-xs text-gray-500 italic pl-2 pb-1">
+                      Pilih Kondisi
+                    </p>
+                    <div className=" flex flex-wrap gap-2">
+                      <div>
+                        <Select
+                          value={selectedClause}
+                          onValueChange={setSelectedClause}
+                        >
+                          <SelectTrigger className="w-[220px]">
+                            <SelectValue placeholder="Pilih Kondisi" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {CLAUSES.map((c) => (
+                              <SelectItem key={c.id} value={c.id}>
+                                {c.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              {selectedClause !== "" && (
-                <div>
-                  {[
-                    "equals",
-                    "not_equals",
-                    "greater_than",
-                    "less_equal",
-                  ].includes(selectedClause) && (
-                    <div>
-                      <p className="text-xs text-gray-500 italic pl-2 pb-1">
-                        Pilih Tipe Pembanding
-                      </p>
-                      <div className="flex flex-wrap gap-2 items-center">
-                        <Select
-                          value={compareType}
-                          onValueChange={(value) => {
-                            const v: any = value;
-                            setCompareType(v);
-                          }}
-                        >
-                          <SelectTrigger className="w-[200px]">
-                            <SelectValue placeholder="Tipe Pembanding" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="set_value">Set Value</SelectItem>
-                            <SelectItem value="bukpot_field">
-                              Bukti Potong
-                            </SelectItem>
-                            <SelectItem value="profil_field">Profil</SelectItem>
-                          </SelectContent>
-                        </Select>
+                {selectedClause !== "" && (
+                  <div>
+                    {[
+                      "equals",
+                      "not_equals",
+                      "greater_than",
+                      "less_equal",
+                    ].includes(selectedClause) && (
+                      <div>
+                        <p className="text-xs text-gray-500 italic pl-2 pb-1">
+                          Pilih Tipe Pembanding
+                        </p>
+                        <div className="flex flex-wrap gap-2 items-center">
+                          <Select
+                            value={compareType}
+                            onValueChange={(value) => {
+                              const v: any = value;
+                              setCompareType(v);
+                            }}
+                          >
+                            <SelectTrigger className="w-[200px]">
+                              <SelectValue placeholder="Tipe Pembanding" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="set_value">
+                                Set Value
+                              </SelectItem>
+                              <SelectItem value="bukpot">
+                                Bukti Potong
+                              </SelectItem>
+                              <SelectItem value="profil">
+                                Profil
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
 
-                        {(() => {
-                          const clauseCfg = CLAUSES.find(
-                            (c) => c.id === selectedClause
-                          );
-                          if (!clauseCfg?.needsValue) return null;
-                          if (compareType !== "set_value") return null;
-                          return (
-                            <Input
-                              type={clauseCfg.valueType}
-                              placeholder="Masukkan nilai"
+                          {(() => {
+                            const clauseCfg = CLAUSES.find(
+                              (c) => c.id === selectedClause
+                            );
+                            if (!clauseCfg?.needsValue) return null;
+                            if (compareType !== "set_value") return null;
+                            return (
+                              <Input
+                                type={clauseCfg.valueType}
+                                placeholder="Masukkan nilai"
+                                value={clauseValue}
+                                onChange={(e) => setClauseValue(e.target.value)}
+                                className="w-[140px]"
+                              />
+                            );
+                          })()}
+
+                          {compareType === "bukpot" && (
+                            <Select
                               value={clauseValue}
-                              onChange={(e) => setClauseValue(e.target.value)}
-                              className="w-[140px]"
-                            />
-                          );
-                        })()}
+                              onValueChange={setClauseValue}
+                            >
+                              <SelectTrigger className="w-[200px]">
+                                <SelectValue placeholder="Pilih Field Bukpot" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {bukpotOptions.map((f, i) => (
+                                  <SelectItem key={i} value={f}>
+                                    {f}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
 
-                        {compareType === "bukpot_field" && (
-                          <Select
-                            value={clauseValue}
-                            onValueChange={setClauseValue}
-                          >
-                            <SelectTrigger className="w-[200px]">
-                              <SelectValue placeholder="Pilih Field Bukpot" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {bukpotOptions.map((f, i) => (
-                                <SelectItem key={i} value={f}>
-                                  {f}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-
-                        {compareType === "profil_field" && (
-                          <Select
-                            value={clauseValue}
-                            onValueChange={setClauseValue}
-                          >
-                            <SelectTrigger className="w-[200px]">
-                              <SelectValue placeholder="Pilih Field Profil" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {profileOptions.map((f, i) => (
-                                <SelectItem key={i} value={f}>
-                                  {f}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
+                          {compareType === "profil" && (
+                            <Select
+                              value={clauseValue}
+                              onValueChange={setClauseValue}
+                            >
+                              <SelectTrigger className="w-[200px]">
+                                <SelectValue placeholder="Pilih Field Profil" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {profileOptions.map((f, i) => (
+                                  <SelectItem key={i} value={f}>
+                                    {f}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* THEN */}
           <div className="p-4 border rounded-xl bg-gray-50 space-y-3">

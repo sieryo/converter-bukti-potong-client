@@ -221,10 +221,10 @@ export const RowRuleDialog: React.FC<RowRuleDialogProps> = ({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="set_value">Set Value</SelectItem>
-                          <SelectItem value="bukpot_field">
+                          <SelectItem value="bukpot">
                             Bukti Potong
                           </SelectItem>
-                          <SelectItem value="profil_field">Profil</SelectItem>
+                          <SelectItem value="profil">Profil</SelectItem>
                         </SelectContent>
                       </Select>
 
@@ -245,7 +245,7 @@ export const RowRuleDialog: React.FC<RowRuleDialogProps> = ({
                         );
                       })()}
 
-                      {compareType === "bukpot_field" && (
+                      {compareType === "bukpot" && (
                         <Select
                           value={compareValue}
                           onValueChange={setCompareValue}
@@ -263,7 +263,7 @@ export const RowRuleDialog: React.FC<RowRuleDialogProps> = ({
                         </Select>
                       )}
 
-                      {compareType === "profil_field" && (
+                      {compareType === "profil" && (
                         <Select
                           value={compareValue}
                           onValueChange={setCompareValue}

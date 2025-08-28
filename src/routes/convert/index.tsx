@@ -11,12 +11,11 @@ import {
 } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useRuleStore } from "@/store/useRuleStore";
+import { useRuleStore, type Rule } from "@/store/useRuleStore";
 import {
   Upload,
   Plus,
   Trash2,
-  Import,
   Download,
   Play,
   CheckCircle,
@@ -33,7 +32,7 @@ export const Route = createFileRoute("/convert/")({
 function RouteComponent() {
   const [header, setHeader] = useState<string[]>([]);
   const [bukpotOptions, setBukpotOptions] = useState<string[]>([]);
-  const { fieldRules, rowFilters, removeRule, exportAll } =
+  const { fieldRules, rowFilters, removeRule, exportAll, removeFilter } =
     useRuleStore();
 
   const [isHeaderDialogOpen, setIsHeaderDialogOpen] = useState(false);
@@ -178,13 +177,13 @@ function RouteComponent() {
                       className="flex items-center justify-between text-sm bg-gray-50 px-2 py-1 rounded"
                     >
                       <span>
-                        {`${f.field} ${f.clause} ${f.compareWith.value ?? ""}`}
+                        {`${f.source}.${f.field} ${f.clause} ${f.compareWith.type}.${f.compareWith.value ?? ""}`}
                       </span>
                       <PromptAlertDialog
                         title="Apakah kamu yakin untuk menghapus filter ini?"
                         description="Filter yang dihapus tidak akan kembali dan harus dibuat lagi."
                         onAction={() => {
-                          // bikin removeRowFilter di store
+                          removeFilter(idx);
                         }}
                       >
                         <Trash2 className="w-4 h-4 text-red-500" />
@@ -203,7 +202,7 @@ function RouteComponent() {
                   (ruleSet) => ruleSet.header === h
                 );
 
-                let rules: any[];
+                let rules: Rule[];
                 if (!ruleSet) {
                   rules = [];
                 } else {
@@ -235,25 +234,35 @@ function RouteComponent() {
                       </p>
                     ) : (
                       <ul className="mt-2 space-y-1">
-                        {rules.map((r, idx) => (
-                          <li
-                            key={idx}
-                            className="flex items-center justify-between text-sm bg-gray-50 px-2 py-1 rounded"
-                          >
-                            <span>
-                              {r.type === "direct"
-                                ? `Direct → ${r.then.type}`
-                                : `If ${r.when.field} ${r.when.clause} → ${r.then.type}`}
-                            </span>
-                            <PromptAlertDialog
-                              title="Apakah kamu yakin untuk menghapus rule ini?"
-                              description="Rule yang dihapus tidak akan kembali dan harus dibuat lagi."
-                              onAction={() => removeRule(h, idx)}
+                        {rules.map((r, idx) => {
+                          let descriptions;
+
+                          if (r.type === "conditional") {
+                            descriptions = `When "${r.when.field}" ${r.when.clause}, then ${r.then.action} ${
+                              r.then.formula ? `${r.then.formula} ` : ""
+                            }${r.then.value ?? ""} ${r.then.from ? `from "${r.then.from.source}.${r.then.from.field}"` : ""}`;
+                          } else if (r.type === "direct") {
+                            descriptions = `Always ${r.then.action} ${
+                              r.then.formula ? `"${r.then.formula}" ` : ""
+                            }${r.then.value ? `"${r.then.value}"` : ""} ${r.then.from ? `from "${r.then.from.source}.${r.then.from.field}"` : ""}`;
+                          }
+
+                          return (
+                            <li
+                              key={idx}
+                              className="flex items-center justify-between text-sm bg-gray-50 px-2 py-1 rounded"
                             >
-                              <Trash2 className="w-4 h-4 text-red-500" />
-                            </PromptAlertDialog>
-                          </li>
-                        ))}
+                              <span>{descriptions}</span>
+                              <PromptAlertDialog
+                                title="Apakah kamu yakin untuk menghapus rule ini?"
+                                description="Rule yang dihapus tidak akan kembali dan harus dibuat lagi."
+                                onAction={() => removeRule(h, idx)}
+                              >
+                                <Trash2 className="w-4 h-4 text-red-500" />
+                              </PromptAlertDialog>
+                            </li>
+                          );
+                        })}
                       </ul>
                     )}
                   </Card>

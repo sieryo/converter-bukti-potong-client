@@ -19,7 +19,10 @@ export interface RowFilter {
 export interface ThenRule {
   action: string;
   value?: string;
-  fromField?: string;
+  from?: {
+    source: Source,
+    field: string
+  }
   formula?: string;
 }
 
@@ -29,12 +32,12 @@ export interface ThenRule {
 type ConditionalRule = {
   type: "conditional";
   when: RowFilter;
-  then: ThenRule
+  then: ThenRule;
 };
 
 type DirectRule = {
   type: "direct";
-  then: ThenRule
+  then: ThenRule;
 };
 
 export type Rule = ConditionalRule | DirectRule;
@@ -53,6 +56,7 @@ type RuleState = {
   addRowFilter: (filter: RowFilter) => void;
   addFieldRule: (header: string, rule: Rule) => void;
   removeRule: (header: string, index: number) => void;
+  removeFilter: (index: number) => void;
   exportAll: () => string;
   importAll: (json: string) => void;
   reset: () => void;
@@ -98,6 +102,11 @@ export const useRuleStore = create<RuleState>((set, get) => ({
       });
       return { fieldRules: updated };
     }),
+
+  removeFilter: (filterIndex: number) =>
+    set((state) => ({
+      rowFilters: state.rowFilters.filter((_, idx) => idx !== filterIndex),
+    })),
 
   exportAll: () => {
     const { rowFilters, fieldRules } = get();
