@@ -24,10 +24,19 @@ import {
 import PromptAlertDialog from "@/components/PromptAlertDialog";
 import { handleExport } from "@/utils/helper";
 import { ImportRuleDialog } from "@/components/ImportRuleDialog";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/convert/")({
   component: RouteComponent,
 });
+
+enum BukpotHeaderState {
+  NOT_VALID,
+  VALID,
+  PENDING,
+}
+
+const REQUIRED_BUKPOT_HEADERS = ["NPWP", "NITKU", "Kode Objek Pajak"];
 
 function RouteComponent() {
   const [header, setHeader] = useState<string[]>([]);
@@ -38,23 +47,44 @@ function RouteComponent() {
   const [isHeaderDialogOpen, setIsHeaderDialogOpen] = useState(false);
   const [isRowDialogOpen, setIsRowDialogOpen] = useState(false);
   const [selectedHeader, setSelectedHeader] = useState<string | null>(null);
+  const [isBukpotHeaderValid, setIsBukpotHeaderValid] =
+    useState<BukpotHeaderState>(BukpotHeaderState.PENDING);
 
   const [bukpotFile, setBukpotFile] = useState<File | null>(null);
   const [rowStart, setRowStart] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!bukpotFile || !rowStart) return;
-    const loadExcel = async () => {
+    const loadTemplate = async () => {
       const processor = new ExcelProcessor(3);
       await processor.loadFromUrl("/template.xlsx");
       setHeader(processor.getHeader());
+    };
+    loadTemplate();
+  }, []);
 
+  useEffect(() => {
+    if (!bukpotFile || !rowStart) return;
+    const loadExcel = async () => {
       const bukpotProcessor = new ExcelProcessor(rowStart, bukpotFile);
       await bukpotProcessor.load();
       setBukpotOptions(bukpotProcessor.getHeader());
     };
     loadExcel();
   }, [bukpotFile, rowStart]);
+
+  useEffect(() => {
+    if (bukpotOptions.length === 0 && !bukpotFile) return;
+    const isValid = REQUIRED_BUKPOT_HEADERS.every((req) =>
+      bukpotOptions.some((h) => h.toLowerCase() === req.toLowerCase())
+    );
+
+    if (isValid) {
+      setIsBukpotHeaderValid(BukpotHeaderState.VALID);
+      toast.success("Header Bukti Potong Terdeteksi")
+    } else {
+      setIsBukpotHeaderValid(BukpotHeaderState.NOT_VALID);
+    }
+  }, [bukpotOptions]);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -87,10 +117,26 @@ function RouteComponent() {
     );
   }
 
-  if (!rowStart) {
+  if (
+    !rowStart ||
+    isBukpotHeaderValid === BukpotHeaderState.NOT_VALID ||
+    isBukpotHeaderValid === BukpotHeaderState.PENDING
+  ) {
     return (
       <div className="h-screen flex flex-col items-center justify-center text-center p-6">
         <h2 className="text-lg font-semibold mb-2">Header baris ke-berapa?</h2>
+        {isBukpotHeaderValid === BukpotHeaderState.NOT_VALID && (
+          <p className="text-sm text-red-500 mb-4">
+            Header tidak valid, biasanya file bukti potong akan ada:
+            {REQUIRED_BUKPOT_HEADERS.map((h) => {
+              return (
+                <span key={h} className=" block text-sm text-gray-700">
+                  - {h}
+                </span>
+              );
+            })}
+          </p>
+        )}
         <input
           type="number"
           min={1}

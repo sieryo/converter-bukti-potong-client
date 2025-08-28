@@ -11,26 +11,33 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRuleStore } from "@/store/useRuleStore";
 import { Import } from "lucide-react";
+import { toast } from "sonner";
+import { useState } from "react";
 
 export const ImportRuleDialog = () => {
   const { importAll } = useRuleStore();
+  const [importedData, setImportedData] = useState("");
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (!file.name.endsWith(".json")) {
-      alert("❌ File harus berformat .json");
+      toast.error("File harus berformat .json");
       return;
     }
 
+    const text = await file.text();
+    setImportedData(text);
+  };
+
+  const handleImport = () => {
     try {
-      const text = await file.text();
-      importAll(text); // langsung panggil store
-      alert("✅ Rules berhasil di-import!");
+      importAll(importedData);
+      toast.success("Rules berhasil di-import!");
     } catch (err) {
       console.error("Import rules gagal:", err);
-      alert("❌ Gagal import rules. Pastikan file valid.");
+      toast.error("Gagal import rules. Pastikan file valid.");
     }
   };
 
@@ -57,6 +64,15 @@ export const ImportRuleDialog = () => {
             className="opacity-100 cursor-pointer"
             onChange={handleFileUpload}
           />
+        </div>
+        <div className=" flex justify-end">
+          <Button
+            onClick={() => {
+              handleImport();
+            }}
+          >
+            Import
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
