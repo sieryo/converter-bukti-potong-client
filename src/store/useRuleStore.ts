@@ -1,3 +1,4 @@
+import { exportRules, importRules, type ExportedRules } from "@/utils/rule";
 import { create } from "zustand";
 
 export type Source = "bukpot" | "profil";
@@ -15,28 +16,25 @@ export interface RowFilter {
   };
 }
 
+export interface ThenRule {
+  action: string;
+  value?: string;
+  fromField?: string;
+  formula?: string;
+}
+
 // --------------------
 // Field Rules
 // --------------------
 type ConditionalRule = {
   type: "conditional";
   when: RowFilter;
-  then: {
-    type: string;
-    value?: string;
-    fromField?: string;
-    formula?: string;
-  };
+  then: ThenRule
 };
 
 type DirectRule = {
   type: "direct";
-  then: {
-    type: string;
-    value?: string;
-    fromField?: string;
-    formula?: string;
-  };
+  then: ThenRule
 };
 
 export type Rule = ConditionalRule | DirectRule;
@@ -55,10 +53,12 @@ type RuleState = {
   addRowFilter: (filter: RowFilter) => void;
   addFieldRule: (header: string, rule: Rule) => void;
   removeRule: (header: string, index: number) => void;
+  exportAll: () => string;
+  importAll: (json: string) => void;
   reset: () => void;
 };
 
-export const useRuleStore = create<RuleState>((set) => ({
+export const useRuleStore = create<RuleState>((set, get) => ({
   rowFilters: [],
   fieldRules: [],
 
@@ -86,6 +86,7 @@ export const useRuleStore = create<RuleState>((set) => ({
         };
       }
     }),
+
   removeRule: (header: string, ruleIndex: number) =>
     set((state) => {
       const updated = state.fieldRules.map((rs) => {
@@ -97,6 +98,19 @@ export const useRuleStore = create<RuleState>((set) => ({
       });
       return { fieldRules: updated };
     }),
+
+  exportAll: () => {
+    const { rowFilters, fieldRules } = get();
+    return exportRules(rowFilters, fieldRules);
+  },
+
+  importAll: (json: string) => {
+    const imported: ExportedRules = importRules(json);
+    set({
+      rowFilters: imported.rowFilters,
+      fieldRules: imported.fieldRules,
+    });
+  },
 
   reset: () => set({ rowFilters: [], fieldRules: [] }),
 }));

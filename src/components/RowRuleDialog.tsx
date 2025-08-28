@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -102,12 +101,6 @@ export const RowRuleDialog: React.FC<RowRuleDialogProps> = ({
 
   return (
     <Dialog onOpenChange={setIsOpen} open={isOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="rounded-lg shadow-sm">
-          Filter Row
-        </Button>
-      </DialogTrigger>
-
       <DialogContent className="max-w-2xl rounded-2xl shadow-lg">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">

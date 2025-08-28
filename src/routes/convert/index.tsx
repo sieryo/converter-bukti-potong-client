@@ -12,7 +12,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useRuleStore } from "@/store/useRuleStore";
-import { Upload, Plus, Trash2, Import, Download, Play } from "lucide-react";
+import {
+  Upload,
+  Plus,
+  Trash2,
+  Import,
+  Download,
+  Play,
+  CheckCircle,
+  Circle,
+} from "lucide-react";
+import PromptAlertDialog from "@/components/PromptAlertDialog";
+import { handleExport } from "@/utils/helper";
+import { ImportRuleDialog } from "@/components/ImportRuleDialog";
 
 export const Route = createFileRoute("/convert/")({
   component: RouteComponent,
@@ -21,27 +33,29 @@ export const Route = createFileRoute("/convert/")({
 function RouteComponent() {
   const [header, setHeader] = useState<string[]>([]);
   const [bukpotOptions, setBukpotOptions] = useState<string[]>([]);
-  const { fieldRules, reset, removeRule } = useRuleStore();
+  const { fieldRules, rowFilters, removeRule, exportAll } =
+    useRuleStore();
 
   const [isHeaderDialogOpen, setIsHeaderDialogOpen] = useState(false);
   const [isRowDialogOpen, setIsRowDialogOpen] = useState(false);
   const [selectedHeader, setSelectedHeader] = useState<string | null>(null);
 
   const [bukpotFile, setBukpotFile] = useState<File | null>(null);
+  const [rowStart, setRowStart] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!bukpotFile) return;
+    if (!bukpotFile || !rowStart) return;
     const loadExcel = async () => {
-      const processor = new ExcelProcessor(3); // header row ke-3
+      const processor = new ExcelProcessor(3);
       await processor.loadFromUrl("/template.xlsx");
       setHeader(processor.getHeader());
 
-      const bukpotProcessor = new ExcelProcessor(2, bukpotFile);
+      const bukpotProcessor = new ExcelProcessor(rowStart, bukpotFile);
       await bukpotProcessor.load();
       setBukpotOptions(bukpotProcessor.getHeader());
     };
     loadExcel();
-  }, [bukpotFile]);
+  }, [bukpotFile, rowStart]);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -74,7 +88,23 @@ function RouteComponent() {
     );
   }
 
-  console.log(fieldRules)
+  if (!rowStart) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center text-center p-6">
+        <h2 className="text-lg font-semibold mb-2">Header baris ke-berapa?</h2>
+        <input
+          type="number"
+          min={1}
+          className="border rounded px-3 py-2 text-sm mb-4"
+          placeholder="Contoh: 2"
+          onChange={(e) => setRowStart(Number(e.target.value))}
+        />
+        <p className="text-xs text-gray-500">
+          Web ini memerlukan data header bukti potong sebelum bisa memproses
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen p-4">
@@ -82,21 +112,102 @@ function RouteComponent() {
         direction="horizontal"
         className="w-full h-full rounded-lg border shadow-sm"
       >
-        {/* LEFT: Template + Rule editor */}
         <ResizablePanel defaultSize={70} minSize={40}>
-          <div className="h-full p-4 flex flex-col gap-4">
-            <h2 className="text-lg font-semibold mb-2">
-              Template Field Rules
-            </h2>
-            <div className="overflow-y-auto space-y-3">
-              {header.map((h, i) => {
-                const ruleSet= fieldRules.find((ruleSet) => ruleSet.header ===  h)
+          <div className="p-4 flex flex-col gap-6 overflow-y-auto">
+            <div className="space-y-2">
+              <h2 className="text-lg font-semibold mb-2">Progress</h2>
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  {bukpotOptions.length > 0 ? (
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <Circle className="w-4 h-4 text-gray-400" />
+                  )}
+                  <span>Header Bukti Potong terdeteksi</span>
+                </div>
+                {bukpotOptions.length === 0 && (
+                  <label
+                    onClick={() => {
+                      setBukpotFile(null);
+                      setRowStart(null);
+                    }}
+                    className="text-xs text-blue-600 hover:underline cursor-pointer"
+                  >
+                    Upload ulang
+                  </label>
+                )}
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                {rowFilters.length > 0 ? (
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                ) : (
+                  <Circle className="w-4 h-4 text-gray-400" />
+                )}
+                <span>Row Filters dibuat</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                {fieldRules.some((r) => r.rules.length > 0) ? (
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                ) : (
+                  <Circle className="w-4 h-4 text-gray-400" />
+                )}
+                <span>Field Rules ditentukan</span>
+              </div>
+            </div>
+          </div>
 
-                let rules : any[]
+          <div className=" p-4 flex flex-col gap-6 overflow-y-auto">
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-lg font-semibold">Row Filters</h2>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setIsRowDialogOpen(true)}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+              {rowFilters.length === 0 ? (
+                <p className="text-xs text-gray-500 italic">Belum ada filter</p>
+              ) : (
+                <ul className="space-y-1">
+                  {rowFilters.map((f, idx) => (
+                    <li
+                      key={idx}
+                      className="flex items-center justify-between text-sm bg-gray-50 px-2 py-1 rounded"
+                    >
+                      <span>
+                        {`${f.field} ${f.clause} ${f.compareWith.value ?? ""}`}
+                      </span>
+                      <PromptAlertDialog
+                        title="Apakah kamu yakin untuk menghapus filter ini?"
+                        description="Filter yang dihapus tidak akan kembali dan harus dibuat lagi."
+                        onAction={() => {
+                          // bikin removeRowFilter di store
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </PromptAlertDialog>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+          <div className="h-full p-4 flex flex-col gap-4 ">
+            <h2 className="text-lg font-semibold mb-2">Template Field Rules</h2>
+            <div className="overflow-y-auto space-y-3 pb-[300px]">
+              {header.map((h, i) => {
+                const ruleSet = fieldRules.find(
+                  (ruleSet) => ruleSet.header === h
+                );
+
+                let rules: any[];
                 if (!ruleSet) {
-                  rules = []
+                  rules = [];
                 } else {
-                  rules = ruleSet.rules
+                  rules = ruleSet.rules;
                 }
 
                 return (
@@ -134,13 +245,13 @@ function RouteComponent() {
                                 ? `Direct → ${r.then.type}`
                                 : `If ${r.when.field} ${r.when.clause} → ${r.then.type}`}
                             </span>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => removeRule(h, idx)}
+                            <PromptAlertDialog
+                              title="Apakah kamu yakin untuk menghapus rule ini?"
+                              description="Rule yang dihapus tidak akan kembali dan harus dibuat lagi."
+                              onAction={() => removeRule(h, idx)}
                             >
                               <Trash2 className="w-4 h-4 text-red-500" />
-                            </Button>
+                            </PromptAlertDialog>
                           </li>
                         ))}
                       </ul>
@@ -162,18 +273,16 @@ function RouteComponent() {
               <Button className="flex items-center gap-2">
                 <Play className="w-4 h-4" /> Convert
               </Button>
-              <Button variant="outline" className="flex items-center gap-2">
-                <Import className="w-4 h-4" /> Import Rules
-              </Button>
-              <Button variant="outline" className="flex items-center gap-2">
-                <Download className="w-4 h-4" /> Export Rules
-              </Button>
+              <ImportRuleDialog />
               <Button
-                variant="destructive"
-                className="flex items-center gap-2 mt-4"
-                onClick={reset}
+                onClick={() => {
+                  const exportedRules = exportAll();
+                  handleExport(exportedRules);
+                }}
+                variant="outline"
+                className="flex items-center gap-2"
               >
-                <Trash2 className="w-4 h-4" /> Reset Rules
+                <Download className="w-4 h-4" /> Export Rules
               </Button>
             </div>
           </div>

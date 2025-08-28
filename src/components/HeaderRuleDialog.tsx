@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -94,7 +93,6 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
     return null;
   }
 
-  console.log(profile);
 
   const profileOptions = mapProfileToLabel(profile);
 
@@ -124,7 +122,7 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
           },
         },
         then: {
-          type: selectedAction,
+          action: selectedAction,
           value: actionConfig?.id === "set_value" ? actionValue : undefined,
           fromField:
             actionConfig?.id === "copy_field" ? actionValue : undefined,
@@ -144,7 +142,7 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
       const newRule: Rule = {
         type: "direct",
         then: {
-          type: selectedAction,
+          action: selectedAction,
           value: actionConfig?.id === "set_value" ? actionValue : undefined,
           fromField:
             actionConfig?.id === "copy_field" ? actionValue : undefined,
@@ -168,12 +166,6 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
 
   return (
     <Dialog onOpenChange={setIsOpen} open={isOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="rounded-lg shadow-sm">
-          {headerName}
-        </Button>
-      </DialogTrigger>
-
       <DialogContent className="max-w-2xl rounded-2xl shadow-lg">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">
@@ -211,7 +203,7 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
                         <span className="mx-1 text-gray-400">→</span>
                         <span className="font-medium text-gray-700">Then:</span>
                         <span>
-                          {rule.then.type}{" "}
+                          {rule.then.action}{" "}
                           {rule.then.value ||
                             rule.then.fromField ||
                             rule.then.formula}
@@ -221,7 +213,7 @@ export const HeaderRuleDialog: React.FC<HeaderRuleDialogProps> = ({
                       <>
                         <span className="font-medium text-gray-700">Then:</span>
                         <span>
-                          {rule.then.type}{" "}
+                          {rule.then.action}{" "}
                           {rule.then.value ||
                             rule.then.fromField ||
                             rule.then.formula}
