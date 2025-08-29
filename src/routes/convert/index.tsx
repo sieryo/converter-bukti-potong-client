@@ -271,7 +271,7 @@ function RouteComponent() {
                 ) : (
                   <Circle className="w-4 h-4 text-gray-400" />
                 )}
-                <span>Field Rules ditentukan</span>
+                <span>Header Field Rules ditentukan</span>
               </div>
             </div>
           </div>
@@ -316,7 +316,7 @@ function RouteComponent() {
             </div>
           </div>
           <div className="h-full p-4 flex flex-col gap-4 ">
-            <h2 className="text-lg font-semibold mb-2">Template Field Rules</h2>
+            <h2 className="text-lg font-semibold mb-2">Template Header Field Rules</h2>
             <div className="overflow-y-auto space-y-3 pb-[300px]">
               {header.map((h, i) => {
                 const ruleSet = fieldRules.find(
