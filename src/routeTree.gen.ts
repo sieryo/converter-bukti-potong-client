@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ConvertIndexRouteImport } from './routes/convert/index'
 import { Route as ProfileNewRouteImport } from './routes/profile/new'
-import { Route as DemoFormSimpleRouteImport } from './routes/demo.form.simple'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,44 +28,35 @@ const ProfileNewRoute = ProfileNewRouteImport.update({
   path: '/profile/new',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DemoFormSimpleRoute = DemoFormSimpleRouteImport.update({
-  id: '/demo/form/simple',
-  path: '/demo/form/simple',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/profile/new': typeof ProfileNewRoute
   '/convert': typeof ConvertIndexRoute
-  '/demo/form/simple': typeof DemoFormSimpleRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/profile/new': typeof ProfileNewRoute
   '/convert': typeof ConvertIndexRoute
-  '/demo/form/simple': typeof DemoFormSimpleRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/profile/new': typeof ProfileNewRoute
   '/convert/': typeof ConvertIndexRoute
-  '/demo/form/simple': typeof DemoFormSimpleRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/profile/new' | '/convert' | '/demo/form/simple'
+  fullPaths: '/' | '/profile/new' | '/convert'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/profile/new' | '/convert' | '/demo/form/simple'
-  id: '__root__' | '/' | '/profile/new' | '/convert/' | '/demo/form/simple'
+  to: '/' | '/profile/new' | '/convert'
+  id: '__root__' | '/' | '/profile/new' | '/convert/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProfileNewRoute: typeof ProfileNewRoute
   ConvertIndexRoute: typeof ConvertIndexRoute
-  DemoFormSimpleRoute: typeof DemoFormSimpleRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -92,13 +82,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileNewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/demo/form/simple': {
-      id: '/demo/form/simple'
-      path: '/demo/form/simple'
-      fullPath: '/demo/form/simple'
-      preLoaderRoute: typeof DemoFormSimpleRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -106,7 +89,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProfileNewRoute: ProfileNewRoute,
   ConvertIndexRoute: ConvertIndexRoute,
-  DemoFormSimpleRoute: DemoFormSimpleRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
