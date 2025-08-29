@@ -2,6 +2,7 @@ import type { Profile } from "@/store/useProfileStore";
 import type { ExportedRules } from "./rule";
 import axios, { type AxiosResponse } from "axios";
 import { BASE_API_PATH } from "@/lib/constants";
+import { errorMessage } from "./message";
 
 export async function convertBukpot(
   bukpotFile: File,
@@ -76,9 +77,9 @@ function handleErrorResponse(err: any) {
       try {
         // @ts-expect-error
         const json = JSON.parse(errorText ?? "");
-        throw new Error(json.detail || "Unknown Error");
+        errorMessage(json.detail || "Unknown Error");
       } catch (parseError) {
-        throw new Error("Error:" + errorText);
+        errorMessage("Error:" + errorText);
       }
     };
     reader.readAsText(err.response.data);

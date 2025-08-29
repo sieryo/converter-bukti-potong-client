@@ -34,6 +34,7 @@ import { useFullScreenLoadingStore } from "@/store/useFullScreenLoadingStore";
 import { FullscreenLoader } from "@/components/FullScreenLoader";
 import type { AxiosResponse } from "axios";
 import { DialogDetailExport } from "@/components/ConvertDetailDialog";
+import ProfileSwitcher from "@/components/ProfileSwitcher";
 
 export const Route = createFileRoute("/convert/")({
   component: RouteComponent,
@@ -139,19 +140,22 @@ function RouteComponent() {
           setIsLoading(true);
         },
         (response) => {
-          setIsLoading(false);
           setResponse(response);
-          setIsDetailOpen(true)
+          setIsDetailOpen(true);
         }
       );
 
-      toast.success("Convert berhasil");
       console.log("Result:", result);
     } catch (err: any) {
       console.error(err);
-      toast.error("Gagal convert");
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (!getActiveProfile()) {
+    return <ProfileSwitcher />;
+  }
 
   if (!bukpotFile) {
     return (
