@@ -27,6 +27,13 @@ import { ImportRuleDialog } from "@/components/ImportRuleDialog";
 import { toast } from "sonner";
 import { ProfilePreview } from "@/components/ProfilePreview";
 import RuleDescription from "@/components/RuleDescription";
+import { type Profile, useProfileStore } from "@/store/useProfileStore";
+import { convertBukpot } from "@/utils/api";
+import type { ExportedRules } from "@/utils/rule";
+import { useFullScreenLoadingStore } from "@/store/useFullScreenLoadingStore";
+import { FullscreenLoader } from "@/components/FullScreenLoader";
+import type { AxiosResponse } from "axios";
+import { DialogDetailExport } from "@/components/ConvertDetailDialog";
 
 export const Route = createFileRoute("/convert/")({
   component: RouteComponent,
@@ -52,8 +59,12 @@ function RouteComponent() {
   const [isBukpotHeaderValid, setIsBukpotHeaderValid] =
     useState<BukpotHeaderState>(BukpotHeaderState.PENDING);
 
+  const { getActiveProfile } = useProfileStore();
   const [bukpotFile, setBukpotFile] = useState<File | null>(null);
   const [rowStart, setRowStart] = useState<number | null>(null);
+  const { setIsLoading } = useFullScreenLoadingStore();
+  const [response, setResponse] = useState<AxiosResponse<any, any>>();
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   useEffect(() => {
     const loadTemplate = async () => {
@@ -92,6 +103,54 @@ function RouteComponent() {
     const file = e.target.files?.[0];
     if (!file) return;
     setBukpotFile(file);
+  };
+
+  const handleConvert = async () => {
+    try {
+      if (!bukpotFile) {
+        toast.error("File Bukti potong belum diupload");
+        return;
+      }
+
+      if (rowFilters.length == 0) {
+        return;
+      }
+
+      if (fieldRules.length == 0) {
+        return;
+      }
+
+      const r: ExportedRules = {
+        fieldRules: fieldRules,
+        rowFilters: rowFilters,
+      };
+
+      const profile: Profile | null = getActiveProfile();
+
+      if (!profile) {
+        return;
+      }
+
+      const result = await convertBukpot(
+        bukpotFile,
+        r,
+        profile,
+        () => {
+          setIsLoading(true);
+        },
+        (response) => {
+          setIsLoading(false);
+          setResponse(response);
+          setIsDetailOpen(true)
+        }
+      );
+
+      toast.success("Convert berhasil");
+      console.log("Result:", result);
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Gagal convert");
+    }
   };
 
   if (!bukpotFile) {
@@ -155,6 +214,13 @@ function RouteComponent() {
 
   return (
     <div className="h-screen p-4">
+      <DialogDetailExport
+        isOpen={isDetailOpen}
+        setIsOpen={setIsDetailOpen}
+        response={response}
+      />
+      <FullscreenLoader />
+
       <div className="w-full pb-3">
         <h1 className=" text-xl">Converter Bukti Potong</h1>
       </div>
@@ -319,9 +385,13 @@ function RouteComponent() {
             <div className="flex flex-col gap-4">
               <h2 className="text-lg font-semibold mb-2">Aksi</h2>
               <div className="flex flex-col gap-2">
-                <Button className="flex items-center gap-2">
+                <Button
+                  className="flex items-center gap-2"
+                  onClick={handleConvert}
+                >
                   <Play className="w-4 h-4" /> Convert
                 </Button>
+
                 <ImportRuleDialog />
                 <Button
                   onClick={() => {
