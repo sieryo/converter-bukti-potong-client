@@ -35,6 +35,7 @@ import { FullscreenLoader } from "@/components/FullScreenLoader";
 import type { AxiosResponse } from "axios";
 import { DialogDetailExport } from "@/components/ConvertDetailDialog";
 import ProfileSwitcher from "@/components/ProfileSwitcher";
+import { BASE_API_PATH } from "@/lib/constants";
 
 export const Route = createFileRoute("/convert/")({
   component: RouteComponent,
@@ -66,6 +67,10 @@ function RouteComponent() {
   const { setIsLoading } = useFullScreenLoadingStore();
   const [response, setResponse] = useState<AxiosResponse<any, any>>();
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+
+  useEffect(() => {
+    console.log(BASE_API_PATH)
+  }, [])
 
   useEffect(() => {
     const loadTemplate = async () => {
