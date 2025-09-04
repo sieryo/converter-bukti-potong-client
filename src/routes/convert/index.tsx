@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { ExcelProcessor } from "@/lib/ExcelProcessor";
+import { ExcelProcessor, type Header } from "@/lib/ExcelProcessor";
 import { createFileRoute } from "@tanstack/react-router";
 import { HeaderRuleDialog } from "@/components/HeaderRuleDialog";
 import { RowRuleDialog } from "@/components/RowRuleDialog";
@@ -50,14 +50,14 @@ enum BukpotHeaderState {
 const REQUIRED_BUKPOT_HEADERS = ["NPWP", "NITKU", "Kode Objek Pajak"];
 
 function RouteComponent() {
-  const [header, setHeader] = useState<string[]>([]);
-  const [bukpotOptions, setBukpotOptions] = useState<string[]>([]);
+  const [header, setHeader] = useState<Header[]>([]);
+  const [bukpotOptions, setBukpotOptions] = useState<Header[]>([]);
   const { fieldRules, rowFilters, removeRule, exportAll, removeFilter } =
     useRuleStore();
 
   const [isHeaderDialogOpen, setIsHeaderDialogOpen] = useState(false);
   const [isRowDialogOpen, setIsRowDialogOpen] = useState(false);
-  const [selectedHeader, setSelectedHeader] = useState<string | null>(null);
+  const [selectedHeader, setSelectedHeader] = useState<Header | null>(null);
   const [isBukpotHeaderValid, setIsBukpotHeaderValid] =
     useState<BukpotHeaderState>(BukpotHeaderState.PENDING);
 
@@ -87,6 +87,8 @@ function RouteComponent() {
       const bukpotProcessor = new ExcelProcessor(rowStart, bukpotFile);
       await bukpotProcessor.load();
       setBukpotOptions(bukpotProcessor.getHeader());
+      // console.log(bukpotProcessor.getHeader())
+
     };
     loadExcel();
   }, [bukpotFile, rowStart]);
@@ -94,7 +96,7 @@ function RouteComponent() {
   useEffect(() => {
     if (bukpotOptions.length === 0 && !bukpotFile) return;
     const isValid = REQUIRED_BUKPOT_HEADERS.every((req) =>
-      bukpotOptions.some((h) => h.toLowerCase() === req.toLowerCase())
+      bukpotOptions.some((h) => h.name.toLowerCase() === req.toLowerCase())
     );
 
     if (isValid) {
@@ -325,7 +327,7 @@ function RouteComponent() {
             <div className="overflow-y-auto space-y-3 pb-[300px]">
               {header.map((h, i) => {
                 const ruleSet = fieldRules.find(
-                  (ruleSet) => ruleSet.header === h
+                  (ruleSet) => ruleSet.header === h.name
                 );
 
                 let rules: Rule[];
@@ -341,7 +343,7 @@ function RouteComponent() {
                     className="p-3 flex flex-col border rounded-lg shadow-sm"
                   >
                     <div className="flex justify-between items-center">
-                      <span className="font-medium">{h}</span>
+                      <span className="font-medium">{h.name}</span>
                       <Button
                         size="sm"
                         variant="ghost"
@@ -370,7 +372,7 @@ function RouteComponent() {
                               <PromptAlertDialog
                                 title="Apakah kamu yakin untuk menghapus rule ini?"
                                 description="Rule yang dihapus tidak akan kembali dan harus dibuat lagi."
-                                onAction={() => removeRule(h, idx)}
+                                onAction={() => removeRule(h.name, idx)}
                               >
                                 <Trash2 className="w-4 h-4 text-red-500" />
                               </PromptAlertDialog>
@@ -427,8 +429,7 @@ function RouteComponent() {
         <HeaderRuleDialog
           isOpen={isHeaderDialogOpen}
           setIsOpen={setIsHeaderDialogOpen}
-          header={header}
-          headerName={selectedHeader}
+          header={selectedHeader}
           bukpotOptions={bukpotOptions}
         />
       )}

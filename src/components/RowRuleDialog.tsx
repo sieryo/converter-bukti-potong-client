@@ -19,6 +19,7 @@ import { useRuleStore, type RowFilter } from "@/store/useRuleStore";
 import { useProfileStore } from "@/store/useProfileStore";
 import { mapProfileToLabel } from "@/utils/helper";
 import { toast } from "sonner";
+import type { Header } from "@/lib/ExcelProcessor";
 
 /* ---------- CLAUSES CONFIG ---------- */
 const CLAUSES = [
@@ -46,7 +47,7 @@ const CLAUSES = [
 ] as const;
 
 interface RowRuleDialogProps {
-  bukpotOptions: string[];
+  bukpotOptions: Header[];
   isOpen: boolean;
   setIsOpen: (val: boolean) => void;
 }
@@ -171,8 +172,8 @@ export const RowRuleDialog: React.FC<RowRuleDialogProps> = ({
                     </SelectTrigger>
                     <SelectContent>
                       {fieldOptions.map((f, i) => (
-                        <SelectItem key={i} value={f}>
-                          {f}
+                        <SelectItem key={i} value={f.name}>
+                          {f.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -256,8 +257,8 @@ export const RowRuleDialog: React.FC<RowRuleDialogProps> = ({
                           </SelectTrigger>
                           <SelectContent>
                             {bukpotOptions.map((f, i) => (
-                              <SelectItem key={i} value={f}>
-                                {f}
+                              <SelectItem key={i} value={f.name}>
+                                {f.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -274,8 +275,8 @@ export const RowRuleDialog: React.FC<RowRuleDialogProps> = ({
                           </SelectTrigger>
                           <SelectContent>
                             {profileOptions.map((f, i) => (
-                              <SelectItem key={i} value={f}>
-                                {f}
+                              <SelectItem key={i} value={f.name}>
+                                {f.name}
                               </SelectItem>
                             ))}
                           </SelectContent>

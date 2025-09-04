@@ -1,8 +1,13 @@
 import * as XLSX from "xlsx";
 
+export interface Header {
+  name: string;
+  dataFormat: string | null;
+}
+
 export class ExcelProcessor {
   private file: File | null;
-  private headerRowNumber: number; // row number dimulai dari 1
+  private headerRowNumber: number;
   private workbook: XLSX.WorkBook | null = null;
   private sheet: XLSX.WorkSheet | null = null;
   private headerRowIndex: number = -1;
@@ -13,7 +18,6 @@ export class ExcelProcessor {
     this.headerRowNumber = headerRowNumber;
   }
 
-  /** load dari File object (misalnya input <input type="file">) */
   async load(): Promise<void> {
     if (!this.file) throw new Error("File tidak tersedia");
 
@@ -21,7 +25,6 @@ export class ExcelProcessor {
     this.processWorkbook(data);
   }
 
-  /** load dari URL (misalnya public/template.xlsx) */
   async loadFromUrl(url: string): Promise<void> {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Gagal fetch file dari ${url}`);
@@ -36,17 +39,14 @@ export class ExcelProcessor {
     this.sheet = this.workbook.Sheets[sheetName];
     this.data = XLSX.utils.sheet_to_json(this.sheet, { header: 1 }) as any[][];
 
-    // convert rowNumber (1-based) ke index array (0-based)
     this.headerRowIndex = this.headerRowNumber - 1;
 
     if (this.headerRowIndex < 0 || this.headerRowIndex >= this.data.length) {
-      throw new Error(
-        `Header row number ${this.headerRowNumber} tidak valid`
-      );
+      throw new Error(`Header row number ${this.headerRowNumber} tidak valid`);
     }
   }
 
-  getHeader(): string[] {
+  getHeader(): Header[] {
     if (this.headerRowIndex === -1) return [];
 
     const rawHeader = (this.data[this.headerRowIndex] as string[]).map((h) =>
@@ -55,7 +55,7 @@ export class ExcelProcessor {
 
     // buat unique kalau ada duplikat
     const seen: Record<string, number> = {};
-    return rawHeader.map((h) => {
+    const uniqueHeader = rawHeader.map((h) => {
       if (!seen[h]) {
         seen[h] = 1;
         return h;
@@ -64,6 +64,50 @@ export class ExcelProcessor {
         return `${h}_${seen[h]}`;
       }
     });
+
+    return uniqueHeader.map((name, colIdx) => ({
+      name,
+      dataFormat: this.detectColumnFormat(colIdx),
+    }));
+  }
+
+  private detectColumnFormat(colIdx: number): string | null {
+    const rows = this.getRows();
+    const values = rows
+      .map((r) => r[colIdx])
+      .filter((v) => v != null && v !== "");
+
+    if (values.length === 0) return null;
+
+    let numberCount = 0;
+    let dateCount = 0;
+
+    for (const v of values) {
+      if (typeof v === "number") {
+        const parsed = XLSX.SSF.parse_date_code(v);
+        if (parsed) {
+          dateCount++;
+          continue;
+        }
+        numberCount++;
+        continue;
+      }
+
+      if (!isNaN(Number(v))) {
+        numberCount++;
+        continue;
+      }
+
+      const d = new Date(v);
+      if (!isNaN(d.getTime())) {
+        dateCount++;
+      }
+    }
+
+    if (dateCount / values.length > 0.7) return "date";
+    if (numberCount / values.length > 0.7) return "number";
+
+    return "string";
   }
 
   getRows(): any[][] {

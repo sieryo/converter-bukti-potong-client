@@ -34,7 +34,7 @@ export default function RuleDescription({ rule }: { rule: Rule }) {
         </Field>{" "}
         <span className="text-gray-700">{rule.when.clause}</span>
         {rule.when.compareWith?.value && (
-          <Value> {rule.when.compareWith.value}</Value>
+          <Value> {rule.when.compareWith.type} - {rule.when.compareWith.value}</Value>
         )}
         , <Keyword>then</Keyword>{" "}
         <span className="text-gray-800">{rule.then.action}</span>
