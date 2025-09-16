@@ -1,11 +1,19 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, ChevronRight, FileType2, XCircle, CheckCircle2, Clock } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  FileType2,
+  XCircle,
+  CheckCircle2,
+  Clock,
+} from "lucide-react";
 import type { BppuCoretax } from "@/types/bppu";
 import {
   PdfItemOption,
   type PdfItemOption as PdfItemOptionType,
 } from "./PdfItemOption";
 import { useHighlightedFile } from "@/store/useHighlightedFile";
+import { useValidateStore } from "@/store/useValidateStore";
 
 interface PdfFileItemProps {
   file: BppuCoretax;
@@ -16,9 +24,10 @@ export function PdfFileItem({ file, onDelete }: PdfFileItemProps) {
   const [expanded, setExpanded] = useState(false);
   const { highlightedId, setHighlighted } = useHighlightedFile();
   const fileNameWithoutExt = file.name.replace(/\.pdf$/i, "");
+  const { processingFiles } = useValidateStore();
 
   const statusStyles: Record<
-    BppuCoretax["status"],
+    BppuCoretax["status"] | "processing",
     { bg: string; border: string; text: string }
   > = {
     pending: {
@@ -31,14 +40,18 @@ export function PdfFileItem({ file, onDelete }: PdfFileItemProps) {
       border: "border-green-300",
       text: "text-green-700",
     },
-    error: {
-      bg: "bg-red-50",
-      border: "border-red-300",
-      text: "text-red-700",
+    error: { bg: "bg-red-50", border: "border-red-300", text: "text-red-700" },
+    processing: {
+      bg: "bg-orange-50",
+      border: "border-orange-300",
+      text: "text-orange-700",
     },
   };
 
-  const { bg, border, text } = statusStyles[file.status];
+  const isLoading = processingFiles.includes(file.id);
+  console.log(isLoading);
+  const statusToUse = isLoading ? "processing" : file.status;
+  const { bg, border, text } = statusStyles[statusToUse];
 
   const options: PdfItemOptionType[] = [
     {
@@ -96,21 +109,28 @@ export function PdfFileItem({ file, onDelete }: PdfFileItemProps) {
 
       {expanded && (
         <div className="px-8 pb-3 space-y-2">
-          {file.status === "valid" && file.data?.nomorBukpot && (
+          {statusToUse === "valid" && file.data?.nomorBukpot && (
             <div className="flex items-center gap-2 text-sm bg-green-100 border border-green-200 rounded-md px-2 py-1 text-green-700">
               <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
               <span>Nomor Bukti Potong: {file.data.nomorBukpot}</span>
             </div>
           )}
 
-          {file.status === "pending" && (
+          {statusToUse === "pending" && (
             <div className="flex items-center gap-2 text-sm bg-gray-100 border border-gray-200 rounded-md px-2 py-1 text-gray-600">
               <Clock className="w-4 h-4 text-gray-500 flex-shrink-0" />
               <span>Menunggu validasi..</span>
             </div>
           )}
 
-          {file.status === "error" &&
+          {statusToUse === "processing" && (
+            <div className="flex items-center gap-2 text-sm bg-orange-100 border border-orange-200 rounded-md px-2 py-1 text-orange-700">
+              <Clock className="w-4 h-4 text-orange-500 flex-shrink-0" />
+              <span>Memproses validasi...</span>
+            </div>
+          )}
+
+          {statusToUse === "error" &&
             file.errors?.map((err, idx) => (
               <div
                 key={idx}
@@ -125,7 +145,9 @@ export function PdfFileItem({ file, onDelete }: PdfFileItemProps) {
                 <div className="flex flex-col">
                   <span>{err.message}</span>
                   {err.name && (
-                    <span className="text-xs text-gray-600">File: {err.name}</span>
+                    <span className="text-xs text-gray-600">
+                      File: {err.name}
+                    </span>
                   )}
                 </div>
               </div>

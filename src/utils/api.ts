@@ -3,6 +3,7 @@ import type { ExportedRules } from "./rule";
 import axios, { type AxiosResponse } from "axios";
 import { BASE_API_PATH } from "@/lib/constants";
 import { errorMessage } from "./message";
+import type { BppuCoretax } from "@/types/bppu";
 
 export async function convertBukpot(
   bukpotFile: File,
@@ -45,6 +46,44 @@ export async function convertBukpot(
 
     return { response };
   }
+}
+
+export async function validateBppu(bppu: BppuCoretax[]) {
+  const formData = new FormData();
+
+  const filesWithIds: { id: string; name: string }[] = [];
+
+  bppu.forEach((file) => {
+    if ((file.status === "pending" || file.status === "error") && file.file) {
+      formData.append("files", file.file);
+      filesWithIds.push({
+        id: file.id,
+        name: file.name,
+      });
+    }
+  });
+
+  if (filesWithIds.length > 0) {
+    formData.append("files_meta", JSON.stringify(filesWithIds));
+  }
+
+  const validDataList = bppu
+    .filter((f) => f.status === "valid" && f.data?.nomorBukpot)
+    .map((f) => ({
+      id: f.id,
+      name: f.name,
+      nomorBukpot: f.data!.nomorBukpot,
+    }));
+
+  if (validDataList.length > 0) {
+    formData.append("valid_files_meta", JSON.stringify(validDataList));
+  }
+
+  const result = await axios.post(`${BASE_API_PATH}/validate_bppu`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+  return result;
 }
 
 function _triggerDownload(response: any) {

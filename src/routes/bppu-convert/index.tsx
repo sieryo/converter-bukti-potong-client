@@ -2,10 +2,13 @@ import { ActionsPanel } from "@/components/BppuActionPanel";
 import FolderUploader from "@/components/FolderUploader";
 import { PdfFileList } from "@/components/PdfFileList";
 import { usePreventNavigation } from "@/hooks/usePreventNavigation";
-import { type BppuCoretax } from "@/types/bppu";
-import { successMessage } from "@/utils/message";
+import { useValidateStore } from "@/store/useValidateStore";
+import { type BppuCoretax, type BppuValidation } from "@/types/bppu";
+import { validateBppu } from "@/utils/api";
+import { errorMessage, successMessage } from "@/utils/message";
 import { generateUUID } from "@/utils/uuid";
 import { createFileRoute } from "@tanstack/react-router";
+import type { AxiosError } from "axios";
 import { useState } from "react";
 
 export const Route = createFileRoute("/bppu-convert/")({
@@ -13,35 +16,8 @@ export const Route = createFileRoute("/bppu-convert/")({
 });
 
 function RouteComponent() {
-  const [bppuFiles, setBppuFiles] = useState<BppuCoretax[]>([
-    {
-      id: "a-random-id",
-      name: "BPPU-001.pdf",
-      status: "pending",
-    },
-    {
-      id: generateUUID(),
-      name: "BPPU-002.pdf",
-      status: "valid",
-      data: {
-        nomorBukpot: "2504GQX1",
-      },
-    },
-    {
-      id: generateUUID(),
-      name: "BPPU-003.pdf",
-      status: "error",
-      errors: [
-        {
-          type: "duplicate",
-          message:
-            "Nomor bukti potong sudah ada pada file",
-          name: "M_01-DOC001_SPT_Unifikasi_BPU_2504GQE0S",
-          linkToId: "a-random-id",
-        },
-      ],
-    },
-  ]);
+  const [bppuFiles, setBppuFiles] = useState<BppuCoretax[]>();
+  const { addFiles, clear } = useValidateStore();
 
   usePreventNavigation(
     !!bppuFiles && bppuFiles.length > 0,
@@ -71,6 +47,68 @@ function RouteComponent() {
     successMessage(`Berhasil menambahkan file ${file.name}`);
   };
 
+  const handleValidate = async () => {
+    if (!bppuFiles) return;
+
+    try {
+      const processingIds: string[] = [];
+      bppuFiles.forEach((file) => {
+        if (
+          (file.status === "pending" || file.status === "error") &&
+          file.file
+        ) {
+          processingIds.push(file.id);
+        }
+      });
+
+      addFiles(processingIds);
+
+      const result = await validateBppu(bppuFiles);
+      const bppuResult: BppuValidation = result.data;
+
+      setBppuFiles(
+        (prev) =>
+          prev?.map((file) => {
+            const apiResult = bppuResult.results.find((r) => r.id === file.id);
+            if (!apiResult) return file;
+
+            if (apiResult.error) {
+              return {
+                ...file,
+                status: "error",
+                errors: [
+                  {
+                    type: apiResult.error.type,
+                    message: apiResult.error.message,
+                    name: apiResult.error.name,
+                    linkToId: apiResult.error.linkToId,
+                  },
+                ],
+              };
+            }
+
+            return {
+              ...file,
+              status: "valid",
+              data: { nomorBukpot: apiResult.nomorBukpot },
+              errors: undefined,
+            };
+          }) ?? []
+      );
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response) {
+        console.log(error.response);
+        errorMessage("Bad Request!");
+      } else {
+        errorMessage("Unexpected Error!");
+        console.log("No response received:", error.message);
+      }
+    } finally {
+      clear();
+    }
+  };
+
   if (!bppuFiles) {
     return (
       <FolderUploader
@@ -88,7 +126,7 @@ function RouteComponent() {
         <ActionsPanel
           onUpload={handleUploadFile}
           onCheckDuplicate={() => console.log("Check duplicate")}
-          onValidate={() => console.log("Validate")}
+          onValidate={handleValidate}
           onConvert={() => console.log("Convert")}
           onExport={() => console.log("Export")}
         />
