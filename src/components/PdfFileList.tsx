@@ -31,7 +31,7 @@ export function PdfFileList({ files, onDelete }: PdfFileListProps) {
 
       <ul className="space-y-2 mb-[200px]">
         {files.map((file) => (
-          <PdfFileItem key={file.name} file={file} onDelete={onDelete} />
+          <PdfFileItem key={file.id} file={file} onDelete={onDelete} />
         ))}
       </ul>
     </div>

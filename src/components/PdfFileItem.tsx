@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -51,6 +51,7 @@ export function PdfFileItem({ file, onDelete }: PdfFileItemProps) {
   const isLoading = processingFiles.includes(file.id);
   const statusToUse = isLoading ? "processing" : file.status;
   const { bg, border, text } = statusStyles[statusToUse];
+  const itemRef = useRef<HTMLLIElement>(null);
 
   const options: PdfItemOptionType[] = [
     {
@@ -62,7 +63,9 @@ export function PdfFileItem({ file, onDelete }: PdfFileItemProps) {
   ];
 
   useEffect(() => {
-    if (highlightedId === file.id) {
+    if (highlightedId === file.id && itemRef.current) {
+      itemRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+
       const timer = setTimeout(() => {
         setHighlighted(undefined);
       }, 2000);
@@ -75,6 +78,7 @@ export function PdfFileItem({ file, onDelete }: PdfFileItemProps) {
 
   return (
     <li
+      ref={itemRef}
       className={`rounded-lg shadow-sm transition border ${border} ${bg} ${highlightClass}`}
     >
       <div className="flex items-center justify-between p-3">

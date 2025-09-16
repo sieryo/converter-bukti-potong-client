@@ -30,7 +30,7 @@ function RouteComponent() {
 
   const handleDeleteFile = (target: BppuCoretax) => {
     setBppuFiles((prev) =>
-      prev ? prev.filter((f) => f.name !== target.name) : prev
+      prev ? prev.filter((f) => f.id !== target.id) : prev
     );
     successMessage(`Berhasil menghapus file ${target.name}`);
   };
