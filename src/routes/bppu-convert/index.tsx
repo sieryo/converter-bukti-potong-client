@@ -1,7 +1,10 @@
-// routes/bppu-convert/index.tsx
 import { ActionsPanel } from "@/components/BppuActionPanel";
-import type { PdfFile } from "@/components/PdfFileItem";
+import FolderUploader from "@/components/FolderUploader";
 import { PdfFileList } from "@/components/PdfFileList";
+import { usePreventNavigation } from "@/hooks/usePreventNavigation";
+import { type BppuCoretax } from "@/types/bppu";
+import { successMessage } from "@/utils/message";
+import { generateUUID } from "@/utils/uuid";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -10,65 +13,80 @@ export const Route = createFileRoute("/bppu-convert/")({
 });
 
 function RouteComponent() {
-  const [files, setFiles] = useState<PdfFile[]>([
-    { name: "bppu-001.pdf", status: "pending" },
+  const [bppuFiles, setBppuFiles] = useState<BppuCoretax[]>([
     {
-      name: "bppu-002.pdf",
-      status: "error",
-      errors: ["Nomor pajak sudah ada di database"],
+      id: "a-random-id",
+      name: "BPPU-001.pdf",
+      status: "pending",
     },
     {
-      name: "bppu-003.pdf",
-      status: "error",
-      errors: ["Format tidak sesuai", "Halaman 1 tidak terbaca"],
+      id: generateUUID(),
+      name: "BPPU-002.pdf",
+      status: "valid",
+      data: {
+        nomorBukpot: "2504GQX1",
+      },
     },
-    { name: "bppu-004.pdf", status: "valid" },
-    { name: "bppu-005.pdf", status: "pending" },
     {
-      name: "bppu-006.pdf",
+      id: generateUUID(),
+      name: "BPPU-003.pdf",
       status: "error",
-      errors: ["File kosong", "Tidak ada nomor pajak"],
+      errors: [
+        {
+          type: "duplicate",
+          message:
+            "Nomor bukti potong sudah ada pada file",
+          name: "M_01-DOC001_SPT_Unifikasi_BPU_2504GQE0S",
+          linkToId: "a-random-id",
+        },
+      ],
     },
-    { name: "bppu-007.pdf", status: "valid" },
-    { name: "bppu-008.pdf", status: "pending" },
-    { name: "bppu-009.pdf", status: "valid" },
-    { name: "bppu-010.pdf", status: "error", errors: ["Halaman rusak"] },
-    { name: "bppu-011.pdf", status: "valid" },
-    { name: "bppu-012.pdf", status: "pending" },
-    { name: "bppu-013.pdf", status: "valid" },
-    { name: "bppu-014.pdf", status: "error", errors: ["Format tidak sesuai"] },
-    { name: "bppu-015.pdf", status: "pending" },
-    { name: "bppu-016.pdf", status: "valid" },
-    {
-      name: "bppu-017.pdf",
-      status: "error",
-      errors: ["Nomor pajak sudah ada di database", "Halaman 2 tidak terbaca"],
-    },
-    { name: "bppu-018.pdf", status: "pending" },
-    { name: "bppu-019.pdf", status: "valid" },
-    {
-      name: "bppu-020.pdf",
-      status: "error",
-      errors: ["File tidak dapat dibuka"],
-    },
-    { name: "bppu-021.pdf", status: "valid" },
-    { name: "bppu-022.pdf", status: "pending" },
-    {
-      name: "bppu-023.pdf",
-      status: "error",
-      errors: ["Format tidak sesuai", "Nomor pajak hilang"],
-    },
-    { name: "bppu-024.pdf", status: "valid" },
-    { name: "bppu-025.pdf", status: "pending" },
   ]);
+
+  usePreventNavigation(
+    !!bppuFiles && bppuFiles.length > 0,
+    "Ada file BPPU yang sudah diupload. Yakin mau keluar?"
+  );
+
+  const handleSuccessUpload = (bppu: BppuCoretax[]) => {
+    setBppuFiles(bppu);
+  };
+
+  const handleDeleteFile = (target: BppuCoretax) => {
+    setBppuFiles((prev) =>
+      prev ? prev.filter((f) => f.name !== target.name) : prev
+    );
+    successMessage(`Berhasil menghapus file ${target.name}`);
+  };
+
+  const handleUploadFile = (file: File) => {
+    const newFile: BppuCoretax = {
+      id: generateUUID(),
+      name: file.name,
+      status: "pending",
+      file,
+    };
+
+    setBppuFiles((prev) => (prev ? [...prev, newFile] : [newFile]));
+    successMessage(`Berhasil menambahkan file ${file.name}`);
+  };
+
+  if (!bppuFiles) {
+    return (
+      <FolderUploader
+        title="Upload Folder berisi BPPU"
+        description="Silakan upload folder berisi file PDF BPPU Coretax terlebih dahulu untuk melanjutkan."
+        onSuccessUpload={handleSuccessUpload}
+      />
+    );
+  }
 
   return (
     <div className="h-screen p-4 flex flex-col">
-      <h1 className="text-xl font-semibold mb-4">Converter BPPU Coretax</h1>
-
       <div className="grid grid-cols-3 gap-4 h-full">
-        <PdfFileList files={files} />
+        <PdfFileList files={bppuFiles} onDelete={handleDeleteFile} />
         <ActionsPanel
+          onUpload={handleUploadFile}
           onCheckDuplicate={() => console.log("Check duplicate")}
           onValidate={() => console.log("Validate")}
           onConvert={() => console.log("Convert")}

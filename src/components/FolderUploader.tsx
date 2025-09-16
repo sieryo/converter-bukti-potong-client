@@ -26,9 +26,10 @@ export default function FolderUploader({
       }
 
       const results: BppuCoretax[] = arrayFiles.map((f) => {
-        const fileName = f.name;
+        const name = f.name;
         return {
-          fileName,
+          name,
+          status: "pending",
           file: f,
         };
       });

@@ -1,22 +1,24 @@
-import { useState } from "react";
-import { ChevronDown, ChevronRight, FileType2, XCircle } from "lucide-react";
-
-export interface PdfFile {
-  name: string;
-  status: "pending" | "valid" | "error";
-  errors?: string[];
-}
+import { useState, useEffect } from "react";
+import { ChevronDown, ChevronRight, FileType2, XCircle, CheckCircle2, Clock } from "lucide-react";
+import type { BppuCoretax } from "@/types/bppu";
+import {
+  PdfItemOption,
+  type PdfItemOption as PdfItemOptionType,
+} from "./PdfItemOption";
+import { useHighlightedFile } from "@/store/useHighlightedFile";
 
 interface PdfFileItemProps {
-  file: PdfFile;
+  file: BppuCoretax;
+  onDelete?: (file: BppuCoretax) => void;
 }
 
-export function PdfFileItem({ file }: PdfFileItemProps) {
+export function PdfFileItem({ file, onDelete }: PdfFileItemProps) {
   const [expanded, setExpanded] = useState(false);
+  const { highlightedId, setHighlighted } = useHighlightedFile();
   const fileNameWithoutExt = file.name.replace(/\.pdf$/i, "");
 
   const statusStyles: Record<
-    PdfFile["status"],
+    BppuCoretax["status"],
     { bg: string; border: string; text: string }
   > = {
     pending: {
@@ -38,10 +40,30 @@ export function PdfFileItem({ file }: PdfFileItemProps) {
 
   const { bg, border, text } = statusStyles[file.status];
 
+  const options: PdfItemOptionType[] = [
+    {
+      label: "Hapus File",
+      onClick: () => onDelete?.(file),
+      isVisible: true,
+      type: "destroy",
+    },
+  ];
+
+  useEffect(() => {
+    if (highlightedId === file.id) {
+      const timer = setTimeout(() => {
+        setHighlighted(undefined);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightedId, file.id, setHighlighted]);
+
+  const highlightClass =
+    highlightedId === file.id ? "ring-2 ring-rose-400 border-rose-400" : "";
+
   return (
     <li
-      className={`rounded-lg shadow-sm transition cursor-pointer border ${border} ${bg}`}
-      onClick={() => setExpanded(!expanded)}
+      className={`rounded-lg shadow-sm transition border ${border} ${bg} ${highlightClass}`}
     >
       <div className="flex items-center justify-between p-3">
         <div className="flex items-center gap-3">
@@ -53,25 +75,62 @@ export function PdfFileItem({ file }: PdfFileItemProps) {
           <span className={`font-medium ${text}`}>{fileNameWithoutExt}</span>
         </div>
 
-        {expanded ? (
-          <ChevronDown className="w-4 h-4 text-gray-500" />
-        ) : (
-          <ChevronRight className="w-4 h-4 text-gray-500" />
-        )}
+        <div className="flex items-center gap-1">
+          {/* Option menu */}
+          <PdfItemOption options={options} />
+
+          {/* Chevron toggle */}
+          <button
+            type="button"
+            onClick={() => setExpanded(!expanded)}
+            className="p-1 rounded-md hover:bg-gray-100 transition"
+          >
+            {expanded ? (
+              <ChevronDown className="w-4 h-4 text-gray-500" />
+            ) : (
+              <ChevronRight className="w-4 h-4 text-gray-500" />
+            )}
+          </button>
+        </div>
       </div>
 
-      {expanded && file.errors && (
-        <ul className="px-8 pb-3 space-y-2">
-          {file.errors.map((err, idx) => (
-            <li
-              key={idx}
-              className="flex items-center gap-2 text-sm bg-red-100 border border-red-200 rounded-md px-2 py-1 text-red-700"
-            >
-              <XCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-              <span>{err}</span>
-            </li>
-          ))}
-        </ul>
+      {expanded && (
+        <div className="px-8 pb-3 space-y-2">
+          {file.status === "valid" && file.data?.nomorBukpot && (
+            <div className="flex items-center gap-2 text-sm bg-green-100 border border-green-200 rounded-md px-2 py-1 text-green-700">
+              <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+              <span>Nomor Bukti Potong: {file.data.nomorBukpot}</span>
+            </div>
+          )}
+
+          {file.status === "pending" && (
+            <div className="flex items-center gap-2 text-sm bg-gray-100 border border-gray-200 rounded-md px-2 py-1 text-gray-600">
+              <Clock className="w-4 h-4 text-gray-500 flex-shrink-0" />
+              <span>Menunggu validasi..</span>
+            </div>
+          )}
+
+          {file.status === "error" &&
+            file.errors?.map((err, idx) => (
+              <div
+                key={idx}
+                className="flex items-start gap-2 text-sm bg-red-100 border border-red-200 rounded-md px-2 py-1 text-red-700 cursor-pointer hover:bg-red-200/70"
+                onClick={() => {
+                  if (err.linkToId) {
+                    setHighlighted(err.linkToId);
+                  }
+                }}
+              >
+                <XCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                <div className="flex flex-col">
+                  <span>{err.message}</span>
+                  {err.name && (
+                    <span className="text-xs text-gray-600">File: {err.name}</span>
+                  )}
+                </div>
+              </div>
+            ))}
+        </div>
       )}
     </li>
   );
