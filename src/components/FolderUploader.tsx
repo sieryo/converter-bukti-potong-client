@@ -1,5 +1,7 @@
+import { MAX_SIZE } from "@/constants/pdf";
 import type { BppuCoretax } from "@/types/bppu";
 import { errorMessage, successMessage } from "@/utils/message";
+import { generateUUID } from "@/utils/uuid";
 import { Upload } from "lucide-react";
 
 export default function FolderUploader({
@@ -25,22 +27,34 @@ export default function FolderUploader({
         return;
       }
 
+      const oversizedFiles = arrayFiles.filter((file) => file.size > MAX_SIZE);
+      if (oversizedFiles.length > 0) {
+        const oversizedNames = oversizedFiles.map((f) => f.name).join(", ");
+        errorMessage(`File terlalu besar (maks 300 KB): ${oversizedNames}`);
+        arrayFiles = arrayFiles.filter((file) => file.size <= MAX_SIZE);
+      }
+
+      if (arrayFiles.length === 0) {
+        return;
+      }
+
       const results: BppuCoretax[] = arrayFiles.map((f) => {
         const name = f.name;
         return {
+          id: generateUUID(),
           name,
           status: "pending",
           file: f,
         };
       });
 
-      console.log(arrayFiles);
-
       successMessage("File PDF berhasil diupload");
 
       if (onSuccessUpload) onSuccessUpload(results);
       e.target.value = "";
-    } catch (err) {}
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (

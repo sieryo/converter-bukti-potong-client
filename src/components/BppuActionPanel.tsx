@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { MAX_SIZE } from "@/constants/pdf";
+import { errorMessage } from "@/utils/message";
 import { Link } from "@tanstack/react-router";
 import { Play, Download, Upload, Home } from "lucide-react";
 import type { ChangeEvent } from "react";
@@ -12,16 +14,26 @@ interface ActionsPanelProps {
 }
 
 export function ActionsPanel({
-  onCheckDuplicate,
   onConvert,
   onExport,
   onUpload,
+  onValidate,
 }: ActionsPanelProps) {
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && onUpload) {
+    if (!file) return;
+
+    if (file.size > MAX_SIZE) {
+      errorMessage(`File ${file.name} terlalu besar (maks 300 KB)`);
+      e.target.value = "";
+      return;
+    }
+
+    if (onUpload) {
       onUpload(file);
     }
+
+    e.target.value = "";
   };
 
   return (
@@ -56,19 +68,16 @@ export function ActionsPanel({
         <Button
           className="flex items-center gap-2 w-full"
           variant="ghost"
-          onClick={onCheckDuplicate}
+          onClick={onValidate}
         >
-          <Play className="w-4 h-4" /> Validasi Nomor Pajak
+          <Play className="w-4 h-4" /> Validasi Semua File
         </Button>
       </div>
 
       {/* Konversi & Export Section */}
       <div className="space-y-2">
         <h3 className="text-sm font-medium text-gray-600">Konversi & Export</h3>
-        <Button
-          className="flex items-center gap-2 w-full"
-          onClick={onConvert}
-        >
+        <Button className="flex items-center gap-2 w-full" onClick={onConvert}>
           <Play className="w-4 h-4" /> Convert ke Excel
         </Button>
         <Button
