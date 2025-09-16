@@ -64,6 +64,11 @@ function RouteComponent() {
       addFiles(processingIds);
 
       const result = await validateBppu(bppuFiles);
+
+      if (!result) {
+        successMessage("Semua file valid")
+        return
+      }
       const bppuResult: BppuValidation = result.data;
 
       setBppuFiles(
@@ -95,6 +100,7 @@ function RouteComponent() {
             };
           }) ?? []
       );
+      successMessage("Validasi berhasil dilakukan!");
     } catch (err) {
       const error = err as AxiosError;
       if (error.response) {

@@ -76,17 +76,17 @@ export function ActionsPanel({
 
       {/* Konversi & Export Section */}
       <div className="space-y-2">
-        <h3 className="text-sm font-medium text-gray-600">Konversi & Export</h3>
+        <h3 className="text-sm font-medium text-gray-600">Konversi</h3>
         <Button className="flex items-center gap-2 w-full" onClick={onConvert}>
           <Play className="w-4 h-4" /> Convert ke Excel
         </Button>
-        <Button
+        {/* <Button
           variant="outline"
           className="flex items-center gap-2 w-full"
           onClick={onExport}
         >
           <Download className="w-4 h-4" /> Export Hasil
-        </Button>
+        </Button> */}
       </div>
 
       {/* Kembali Section */}

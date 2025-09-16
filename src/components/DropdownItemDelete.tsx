@@ -33,7 +33,7 @@ export const DropdownItemDelete = ({
         <DialogHeader>
           <DialogTitle>Apakah kamu yakin?</DialogTitle>
           <DialogDescription>
-            Pdf Ini akan dihapus pada sistem ini.
+            Pdf Ini akan dihapus pada aplikasi ini.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

@@ -49,7 +49,6 @@ export function PdfFileItem({ file, onDelete }: PdfFileItemProps) {
   };
 
   const isLoading = processingFiles.includes(file.id);
-  console.log(isLoading);
   const statusToUse = isLoading ? "processing" : file.status;
   const { bg, border, text } = statusStyles[statusToUse];
 

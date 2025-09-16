@@ -63,6 +63,10 @@ export async function validateBppu(bppu: BppuCoretax[]) {
     }
   });
 
+  if (filesWithIds.length == 0) {
+    return
+  }
+
   if (filesWithIds.length > 0) {
     formData.append("files_meta", JSON.stringify(filesWithIds));
   }
