@@ -52,3 +52,8 @@ export const handleExport = (text: string) => {
   link.click();
   URL.revokeObjectURL(url);
 };
+
+export function getFolderNameFromPath(path : string) {
+  const parts = path.split("/");
+  return parts.length > 1 ? parts[0] : "uncategorized";
+}

@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useRuleStore, type Rule } from "@/store/useRuleStore";
 import {
-  Upload,
   Plus,
   Trash2,
   Download,
@@ -36,6 +35,7 @@ import type { AxiosResponse } from "axios";
 import { DialogDetailExport } from "@/components/ConvertDetailDialog";
 import ProfileSwitcher from "@/components/ProfileSwitcher";
 import { BASE_API_PATH } from "@/lib/constants";
+import FileUploader from "@/components/FileUploader";
 
 export const Route = createFileRoute("/convert/")({
   component: RouteComponent,
@@ -69,8 +69,8 @@ function RouteComponent() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   useEffect(() => {
-    console.log(BASE_API_PATH)
-  }, [])
+    console.log(BASE_API_PATH);
+  }, []);
 
   useEffect(() => {
     const loadTemplate = async () => {
@@ -88,7 +88,6 @@ function RouteComponent() {
       await bukpotProcessor.load();
       setBukpotOptions(bukpotProcessor.getHeader());
       // console.log(bukpotProcessor.getHeader())
-
     };
     loadExcel();
   }, [bukpotFile, rowStart]);
@@ -166,26 +165,12 @@ function RouteComponent() {
 
   if (!bukpotFile) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center text-center p-6">
-        <Upload className="w-12 h-12 text-gray-400 mb-4" />
-        <h2 className="text-lg font-semibold mb-2">
-          Upload Bukti Potong Excel
-        </h2>
-        <p className="text-sm text-gray-500 mb-4">
-          Silakan upload file Excel bukti potong terlebih dahulu untuk
-          melanjutkan.
-        </p>
-        <input
-          type="file"
-          accept=".xlsx,.xls"
-          onChange={handleUpload}
-          className="block text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
-                     file:rounded-full file:border-0
-                     file:text-sm file:font-semibold
-                     file:bg-blue-50 file:text-blue-700
-                     hover:file:bg-blue-100"
-        />
-      </div>
+      <FileUploader
+        title="Upload Bukti Potong Excel"
+        description="Silakan upload file Excel bukti potong terlebih dahulu untuk
+          melanjutkan."
+        onUpload={handleUpload}
+      />
     );
   }
 
@@ -323,7 +308,9 @@ function RouteComponent() {
             </div>
           </div>
           <div className="h-full p-4 flex flex-col gap-4 ">
-            <h2 className="text-lg font-semibold mb-2">Template Header Field Rules</h2>
+            <h2 className="text-lg font-semibold mb-2">
+              Template Header Field Rules
+            </h2>
             <div className="overflow-y-auto space-y-3 pb-[300px]">
               {header.map((h, i) => {
                 const ruleSet = fieldRules.find(

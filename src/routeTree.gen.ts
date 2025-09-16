@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HomeIndexRouteImport } from './routes/home/index'
 import { Route as ConvertIndexRouteImport } from './routes/convert/index'
+import { Route as BppuConvertIndexRouteImport } from './routes/bppu-convert/index'
 import { Route as ProfileNewRouteImport } from './routes/profile/new'
 
 const IndexRoute = IndexRouteImport.update({
@@ -18,9 +20,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HomeIndexRoute = HomeIndexRouteImport.update({
+  id: '/home/',
+  path: '/home/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConvertIndexRoute = ConvertIndexRouteImport.update({
   id: '/convert/',
   path: '/convert/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BppuConvertIndexRoute = BppuConvertIndexRouteImport.update({
+  id: '/bppu-convert/',
+  path: '/bppu-convert/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileNewRoute = ProfileNewRouteImport.update({
@@ -32,31 +44,45 @@ const ProfileNewRoute = ProfileNewRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/profile/new': typeof ProfileNewRoute
+  '/bppu-convert': typeof BppuConvertIndexRoute
   '/convert': typeof ConvertIndexRoute
+  '/home': typeof HomeIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/profile/new': typeof ProfileNewRoute
+  '/bppu-convert': typeof BppuConvertIndexRoute
   '/convert': typeof ConvertIndexRoute
+  '/home': typeof HomeIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/profile/new': typeof ProfileNewRoute
+  '/bppu-convert/': typeof BppuConvertIndexRoute
   '/convert/': typeof ConvertIndexRoute
+  '/home/': typeof HomeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/profile/new' | '/convert'
+  fullPaths: '/' | '/profile/new' | '/bppu-convert' | '/convert' | '/home'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/profile/new' | '/convert'
-  id: '__root__' | '/' | '/profile/new' | '/convert/'
+  to: '/' | '/profile/new' | '/bppu-convert' | '/convert' | '/home'
+  id:
+    | '__root__'
+    | '/'
+    | '/profile/new'
+    | '/bppu-convert/'
+    | '/convert/'
+    | '/home/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProfileNewRoute: typeof ProfileNewRoute
+  BppuConvertIndexRoute: typeof BppuConvertIndexRoute
   ConvertIndexRoute: typeof ConvertIndexRoute
+  HomeIndexRoute: typeof HomeIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,11 +94,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/home/': {
+      id: '/home/'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/convert/': {
       id: '/convert/'
       path: '/convert'
       fullPath: '/convert'
       preLoaderRoute: typeof ConvertIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bppu-convert/': {
+      id: '/bppu-convert/'
+      path: '/bppu-convert'
+      fullPath: '/bppu-convert'
+      preLoaderRoute: typeof BppuConvertIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile/new': {
@@ -88,7 +128,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProfileNewRoute: ProfileNewRoute,
+  BppuConvertIndexRoute: BppuConvertIndexRoute,
   ConvertIndexRoute: ConvertIndexRoute,
+  HomeIndexRoute: HomeIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

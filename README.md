@@ -2,7 +2,6 @@
 
 ![alt text](preview.png)
 
-
 ## Contoh hasil struktur:
 
 ```json
@@ -25,33 +24,41 @@
         {
           "type": "conditional",
           "when": {
-            "source": "profil",
-            "field": "Tanggal Masa Pajak",
+            "source": "bukpot",
+            "field": "Settlemet Date",
             "clause": "greater_than",
             "compareWith": {
-              "type": "set_value",
-              "value": "15"
+              "type": "profil",
+              "value": "Tanggal Masa Pajak"
             }
           },
           "then": {
             "action": "formula",
-            "formula": "bulan_sekarang"
+            "from": {
+              "source": "bukpot",
+              "field": "Settlemet Date"
+            },
+            "formula": "get_bulan_sekarang_field"
           }
         },
         {
           "type": "conditional",
           "when": {
-            "source": "profil",
-            "field": "Tanggal Masa Pajak",
+            "source": "bukpot",
+            "field": "Settlemet Date",
             "clause": "less_equal",
             "compareWith": {
-              "type": "set_value",
-              "value": "15"
+              "type": "profil",
+              "value": "Tanggal Masa Pajak"
             }
           },
           "then": {
             "action": "formula",
-            "formula": "bulan_sebelumnya"
+            "from": {
+              "source": "bukpot",
+              "field": "Settlemet Date"
+            },
+            "formula": "get_bulan_sebelumnya_field"
           }
         }
       ]
@@ -63,7 +70,11 @@
           "type": "direct",
           "then": {
             "action": "formula",
-            "formula": "tahun_sekarang"
+            "from": {
+              "source": "bukpot",
+              "field": "Settlemet Date"
+            },
+            "formula": "get_tahun_sekarang_field"
           }
         }
       ]
@@ -236,7 +247,7 @@
       ]
     },
     {
-      "header": "Tanggal Pemotongan",
+      "header": "Tanggal Dok. Referensi",
       "rules": [
         {
           "type": "direct",
@@ -244,32 +255,8 @@
             "action": "copy_field",
             "from": {
               "source": "bukpot",
-              "field": "Settlemet Date"
+              "field": "FP DATE"
             }
-          }
-        }
-      ]
-    },
-    {
-      "header": "Nomor SP2D (IP)",
-      "rules": [
-        {
-          "type": "direct",
-          "then": {
-            "action": "set_value",
-            "value": ""
-          }
-        }
-      ]
-    },
-    {
-      "header": "Opsi Pembayaran (IP)",
-      "rules": [
-        {
-          "type": "direct",
-          "then": {
-            "action": "set_value",
-            "value": "N/A"
           }
         }
       ]
@@ -290,7 +277,31 @@
       ]
     },
     {
-      "header": "Tanggal Dok. Referensi",
+      "header": "Opsi Pembayaran (IP)",
+      "rules": [
+        {
+          "type": "direct",
+          "then": {
+            "action": "set_value",
+            "value": "N/A"
+          }
+        }
+      ]
+    },
+    {
+      "header": "Nomor SP2D (IP)",
+      "rules": [
+        {
+          "type": "direct",
+          "then": {
+            "action": "set_value",
+            "value": ""
+          }
+        }
+      ]
+    },
+    {
+      "header": "Tanggal Pemotongan",
       "rules": [
         {
           "type": "direct",
@@ -298,7 +309,7 @@
             "action": "copy_field",
             "from": {
               "source": "bukpot",
-              "field": "FP DATE"
+              "field": "Settlemet Date"
             }
           }
         }

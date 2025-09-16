@@ -107,7 +107,7 @@ export default function ProfileSwitcher() {
                   onClick={() => {
                     setActive(selectedProfile.id);
                     setSelected(null);
-                    navigate({ to: "/convert" });
+                    navigate({ to: "/home" });
                   }}
                 >
                   Pilih
