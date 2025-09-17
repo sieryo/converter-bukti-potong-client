@@ -8,30 +8,29 @@ export const Route = createFileRoute("/home/")({
 
 function RouteComponent() {
   return (
-    <div className="grid h-screen grid-cols-2 p-12">
+    <div className="grid min-h-screen grid-cols-1 sm:grid-cols-2 gap-6 p-16 bg-gray-50">
       <Link
         to="/convert"
-        className="group flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 transition"
+        className="group flex flex-col items-center justify-center rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-md hover:-translate-y-1"
       >
-        <FileCode2 className="mb-4 h-16 w-16 text-blue-600 transition-transform group-hover:scale-110" />
-        <h2 className="text-2xl font-semibold text-blue-700 group-hover:text-blue-800">
+        <FileCode2 className="mb-3 h-12 w-12 text-gray-600 transition-transform group-hover:scale-110" />
+        <h2 className="text-lg font-semibold text-gray-800 group-hover:text-gray-900">
           Convert Bukpot
         </h2>
-        <p className="mt-2 text-sm text-blue-500 opacity-80 group-hover:opacity-100">
+        <p className="mt-1 text-sm text-gray-500 text-center">
           Konversi data bukti potong agar sesuai dengan sistem Coretax
         </p>
       </Link>
 
       <Link
         to="/bppu-convert"
-        className="group flex flex-col items-center justify-center bg-gradient-to-br from-red-50 to-red-100 transition"
+        className="group flex flex-col items-center justify-center rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-md hover:-translate-y-1"
       >
-        <FileText className="mb-4 h-16 w-16 text-red-600 transition-transform group-hover:scale-110" />
-
-        <h2 className="text-2xl font-semibold text-red-700 group-hover:text-red-800">
+        <FileText className="mb-3 h-12 w-12 text-gray-600 transition-transform group-hover:scale-110" />
+        <h2 className="text-lg font-semibold text-gray-800 group-hover:text-gray-900">
           Convert BPPU Coretax
         </h2>
-        <p className="mt-2 text-sm text-red-500 opacity-80 group-hover:opacity-100">
+        <p className="mt-1 text-sm text-gray-500 text-center">
           Konversi file(s) PDF BPPU Coretax menjadi Rekap
         </p>
       </Link>

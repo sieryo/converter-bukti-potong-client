@@ -48,6 +48,23 @@ export async function convertBukpot(
   }
 }
 
+export async function convertBppu(bppu: BppuCoretax[]) {
+  const formData = new FormData();
+
+  bppu.forEach((file) => {
+    if (file.file) {
+      formData.append("files", file.file);
+    }
+  });
+
+  const result = await axios.post(`${BASE_API_PATH}/convert_bppu`, formData, {
+    responseType: "blob",
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+  return result;
+}
+
 export async function validateBppu(bppu: BppuCoretax[]) {
   const formData = new FormData();
 
@@ -64,7 +81,7 @@ export async function validateBppu(bppu: BppuCoretax[]) {
   });
 
   if (filesWithIds.length == 0) {
-    return
+    return;
   }
 
   if (filesWithIds.length > 0) {
@@ -90,11 +107,11 @@ export async function validateBppu(bppu: BppuCoretax[]) {
   return result;
 }
 
-function _triggerDownload(response: any) {
+function _triggerDownload(response: any, ext: string = "xlsx") {
   const url = window.URL.createObjectURL(new Blob([response.data]));
   const exportedName = response.headers.get("X-Exported-Filename");
 
-  let filename = `${exportedName}.zip`;
+  let filename = `${exportedName}.xlsx`;
 
   const link = document.createElement("a");
   link.href = url;
@@ -104,8 +121,8 @@ function _triggerDownload(response: any) {
   link.remove();
 }
 
-export function triggerDownload(response: any) {
-  _triggerDownload(response);
+export function triggerDownload(response: any, ext: string = "xlsx") {
+  _triggerDownload(response, ext);
 }
 
 function handleErrorResponse(err: any) {

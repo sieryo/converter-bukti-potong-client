@@ -92,10 +92,8 @@ export function PdfFileItem({ file, onDelete }: PdfFileItemProps) {
         </div>
 
         <div className="flex items-center gap-1">
-          {/* Option menu */}
           <PdfItemOption options={options} />
 
-          {/* Chevron toggle */}
           <button
             type="button"
             onClick={() => setExpanded(!expanded)}
@@ -129,7 +127,7 @@ export function PdfFileItem({ file, onDelete }: PdfFileItemProps) {
           {statusToUse === "processing" && (
             <div className="flex items-center gap-2 text-sm bg-orange-100 border border-orange-200 rounded-md px-2 py-1 text-orange-700">
               <Clock className="w-4 h-4 text-orange-500 flex-shrink-0" />
-              <span>Memproses validasi...</span>
+              <span>Memproses...</span>
             </div>
           )}
 

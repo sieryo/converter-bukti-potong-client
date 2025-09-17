@@ -7,6 +7,7 @@ import {
 import { cn } from "@/lib/utils";
 import { EllipsisVertical } from "lucide-react";
 import { DropdownItemDelete } from "./DropdownItemDelete";
+import { useApiLoadingStore } from "@/store/useApiLoading";
 
 export type PdfItemOption = {
   label: string;
@@ -21,13 +22,15 @@ export const PdfItemOption = ({
   isActive?: boolean;
   options: PdfItemOption[];
 }) => {
+  const {isLoading} = useApiLoadingStore()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           className={cn(
-            "p-1 text-gray-800 group-hover:opacity-100 transition-opacity"
+            "p-1 text-gray-800 disabled:text-gray-400 group-hover:opacity-100 transition-opacity"
           )}
+          disabled={isLoading}
         >
           <EllipsisVertical className="w-4 h-4" />
         </button>

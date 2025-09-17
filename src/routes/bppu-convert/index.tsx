@@ -2,14 +2,15 @@ import { ActionsPanel } from "@/components/BppuActionPanel";
 import FolderUploader from "@/components/FolderUploader";
 import { PdfFileList } from "@/components/PdfFileList";
 import { usePreventNavigation } from "@/hooks/usePreventNavigation";
+import { useApiLoadingStore } from "@/store/useApiLoading";
 import { useValidateStore } from "@/store/useValidateStore";
 import { type BppuCoretax, type BppuValidation } from "@/types/bppu";
-import { validateBppu } from "@/utils/api";
+import { convertBppu, triggerDownload, validateBppu } from "@/utils/api";
 import { errorMessage, successMessage } from "@/utils/message";
 import { generateUUID } from "@/utils/uuid";
 import { createFileRoute } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 export const Route = createFileRoute("/bppu-convert/")({
   component: RouteComponent,
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/bppu-convert/")({
 function RouteComponent() {
   const [bppuFiles, setBppuFiles] = useState<BppuCoretax[]>();
   const { addFiles, clear } = useValidateStore();
+  const { setIsLoading } = useApiLoadingStore();
 
   usePreventNavigation(
     !!bppuFiles && bppuFiles.length > 0,
@@ -35,17 +37,66 @@ function RouteComponent() {
     successMessage(`Berhasil menghapus file ${target.name}`);
   };
 
-  const handleUploadFile = (file: File) => {
-    const newFile: BppuCoretax = {
+  const handleUploadFiles = (files: File[]) => {
+    const newFiles: BppuCoretax[] = files.map((file) => ({
       id: generateUUID(),
       name: file.name,
       status: "pending",
       file,
-    };
+    }));
 
-    setBppuFiles((prev) => (prev ? [...prev, newFile] : [newFile]));
-    successMessage(`Berhasil menambahkan file ${file.name}`);
+    setBppuFiles((prev) => (prev ? [...prev, ...newFiles] : newFiles));
+
+    if (newFiles.length === 1) {
+      successMessage(`Berhasil menambahkan file ${newFiles[0].name}`);
+    } else {
+      successMessage(`Berhasil menambahkan ${newFiles.length} file`);
+    }
   };
+
+  const handleConvert = useCallback(async () => {
+    if (!bppuFiles || bppuFiles.length === 0) return;
+
+    const allValid = bppuFiles.every((file) => file.status === "valid");
+    if (!allValid) {
+      errorMessage(
+        "Masih ada file yang belum valid, silahkan validasi kembali"
+      );
+      console.warn("Masih ada yang belum valid");
+      return;
+    }
+    const processingIds: string[] = [];
+
+    bppuFiles.forEach((file) => {
+      processingIds.push(file.id);
+    });
+
+    addFiles(processingIds);
+    setIsLoading(true);
+
+    try {
+      const response = await convertBppu(bppuFiles);
+
+      if (response.status == 200) {
+        triggerDownload(response);
+        successMessage("Berhasil convert!");
+      } else {
+        errorMessage(`Error :  ${response.statusText}`);
+      }
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response) {
+        console.log(error.response);
+        errorMessage("Bad Request!");
+      } else {
+        errorMessage("Unexpected Error! Maybe network?");
+        console.log("No response received:", error.message);
+      }
+    } finally {
+      clear();
+      setIsLoading(false);
+    }
+  }, [bppuFiles]);
 
   const handleValidate = async () => {
     if (!bppuFiles) return;
@@ -62,14 +113,15 @@ function RouteComponent() {
       });
 
       addFiles(processingIds);
+      setIsLoading(true);
 
-      const result = await validateBppu(bppuFiles);
+      const response = await validateBppu(bppuFiles);
 
-      if (!result) {
-        successMessage("Semua file valid")
-        return
+      if (!response) {
+        successMessage("Semua file valid");
+        return;
       }
-      const bppuResult: BppuValidation = result.data;
+      const bppuResult: BppuValidation = response.data;
 
       setBppuFiles(
         (prev) =>
@@ -112,6 +164,7 @@ function RouteComponent() {
       }
     } finally {
       clear();
+      setIsLoading(false);
     }
   };
 
@@ -130,10 +183,10 @@ function RouteComponent() {
       <div className="grid grid-cols-3 gap-4 h-full">
         <PdfFileList files={bppuFiles} onDelete={handleDeleteFile} />
         <ActionsPanel
-          onUpload={handleUploadFile}
+          onUpload={handleUploadFiles}
           onCheckDuplicate={() => console.log("Check duplicate")}
           onValidate={handleValidate}
-          onConvert={() => console.log("Convert")}
+          onConvert={handleConvert}
           onExport={() => console.log("Export")}
         />
       </div>

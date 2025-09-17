@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { MAX_SIZE } from "@/constants/pdf";
+import { useApiLoadingStore } from "@/store/useApiLoading";
 import { errorMessage } from "@/utils/message";
 import { Link } from "@tanstack/react-router";
-import { Play, Download, Upload, Home } from "lucide-react";
+import { Play, Upload, Home } from "lucide-react";
 import type { ChangeEvent } from "react";
 
 interface ActionsPanelProps {
@@ -10,27 +11,30 @@ interface ActionsPanelProps {
   onValidate?: () => void;
   onConvert?: () => void;
   onExport?: () => void;
-  onUpload?: (file: File) => void;
+  onUpload?: (files: File[]) => void;
 }
 
 export function ActionsPanel({
   onConvert,
-  onExport,
   onUpload,
   onValidate,
 }: ActionsPanelProps) {
+  const { isLoading } = useApiLoadingStore();
+
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files) return;
 
-    if (file.size > MAX_SIZE) {
-      errorMessage(`File ${file.name} terlalu besar (maks 300 KB)`);
-      e.target.value = "";
-      return;
-    }
+    const validFiles = Array.from(files).filter((file) => {
+      if (file.size > MAX_SIZE) {
+        errorMessage(`File ${file.name} terlalu besar (maks 300 KB)`);
+        return false;
+      }
+      return true;
+    });
 
-    if (onUpload) {
-      onUpload(file);
+    if (onUpload && validFiles.length > 0) {
+      onUpload(validFiles);
     }
 
     e.target.value = "";
@@ -47,6 +51,7 @@ export function ActionsPanel({
           <input
             type="file"
             accept="application/pdf"
+            multiple
             className="hidden"
             onChange={handleFileChange}
           />
@@ -54,6 +59,7 @@ export function ActionsPanel({
             variant="secondary"
             className="flex items-center gap-2 w-full"
             asChild
+            disabled={isLoading}
           >
             <span>
               <Upload className="w-4 h-4" /> Upload File PDF
@@ -69,6 +75,7 @@ export function ActionsPanel({
           className="flex items-center gap-2 w-full"
           variant="ghost"
           onClick={onValidate}
+          disabled={isLoading}
         >
           <Play className="w-4 h-4" /> Validasi Semua File
         </Button>
@@ -77,16 +84,13 @@ export function ActionsPanel({
       {/* Konversi & Export Section */}
       <div className="space-y-2">
         <h3 className="text-sm font-medium text-gray-600">Konversi</h3>
-        <Button className="flex items-center gap-2 w-full" onClick={onConvert}>
+        <Button
+          className="flex items-center gap-2 w-full"
+          disabled={isLoading}
+          onClick={onConvert}
+        >
           <Play className="w-4 h-4" /> Convert ke Excel
         </Button>
-        {/* <Button
-          variant="outline"
-          className="flex items-center gap-2 w-full"
-          onClick={onExport}
-        >
-          <Download className="w-4 h-4" /> Export Hasil
-        </Button> */}
       </div>
 
       {/* Kembali Section */}
@@ -97,7 +101,7 @@ export function ActionsPanel({
           className="flex items-center gap-2 w-full"
           asChild
         >
-          <Link to="/home">
+          <Link to="/home" disabled={isLoading}>
             <Home className="w-4 h-4" /> Kembali ke Beranda
           </Link>
         </Button>

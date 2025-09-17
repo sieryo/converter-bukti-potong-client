@@ -287,19 +287,33 @@ function RouteComponent() {
                   {rowFilters.map((f, idx) => (
                     <li
                       key={idx}
-                      className="flex items-center justify-between text-sm bg-gray-50 px-2 py-1 rounded"
+                      className="flex items-center justify-between rounded bg-gray-50 px-2 py-1 text-sm"
                     >
-                      <span>
-                        {`${f.source}.${f.field} ${f.clause} ${f.compareWith.type}.${f.compareWith.value ?? ""}`}
+                      <span className="leading-relaxed">
+                        <span className="font-semibold text-gray-700">
+                          Include rows
+                        </span>{" "}
+                        from <span className="text-blue-600">{f.source}</span>{" "}
+                        <span className="font-semibold text-gray-700">
+                          where
+                        </span>{" "}
+                        <span className="text-blue-600">{f.field}</span>{" "}
+                        <span className="text-gray-700">{f.clause}</span>{" "}
+                        {f.compareWith?.value && (
+                          <span className="text-green-600">
+                            {f.compareWith.type} - {f.compareWith.value}
+                          </span>
+                        )}
                       </span>
+
                       <PromptAlertDialog
-                        title="Apakah kamu yakin untuk menghapus filter ini?"
-                        description="Filter yang dihapus tidak akan kembali dan harus dibuat lagi."
+                        title="Are you sure you want to delete this filter?"
+                        description="Once deleted, the filter cannot be restored and must be created again."
                         onAction={() => {
                           removeFilter(idx);
                         }}
                       >
-                        <Trash2 className="w-4 h-4 text-red-500" />
+                        <Trash2 className="h-4 w-4 text-red-500" />
                       </PromptAlertDialog>
                     </li>
                   ))}
