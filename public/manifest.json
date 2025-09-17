@@ -1,6 +1,6 @@
 {
-  "short_name": "TanStack App",
-  "name": "Create TanStack App Sample",
+  "short_name": "Convert Bukti Potong",
+  "name": "Convert File Bukti Potong ke format yang sesuai dengan sistem coretax",
   "icons": [
     {
       "src": "favicon.ico",
