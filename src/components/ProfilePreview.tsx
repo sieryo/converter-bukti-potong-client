@@ -21,24 +21,38 @@ export function ProfilePreview() {
 
   return (
     <div className="mt-4">
-      <Card className="border border-gray-300 bg-gray-50">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center justify-between text-base font-semibold">
-            <span>{activeProfile.alias}</span>
-            <Badge variant="outline">Aktif</Badge>
+      <Card className="rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-800">
+            <span className="truncate">{activeProfile.alias}</span>
+            <Badge variant="outline" className="text-xs">
+              Aktif
+            </Badge>
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="text-sm text-muted-foreground space-y-3">
-          <div className="grid grid-cols-2 gap-y-1">
-            <span className="font-medium">NPWP</span>
-            <span className="truncate">{activeProfile.npwp}</span>
+        <CardContent className="text-sm text-gray-600 space-y-4">
+          <div className="flex flex-col gap-2">
+            <div>
+              <span className="block font-medium text-gray-700">NPWP</span>
+              <p className="whitespace-normal break-words">
+                {activeProfile.npwp}
+              </p>
+            </div>
 
-            <span className="font-medium">Cutoff Date</span>
-            <span>{activeProfile.cutoffDate}</span>
+            <div>
+              <span className="block font-medium text-gray-700">
+                Cutoff Date
+              </span>
+              <p>{activeProfile.cutoffDate}</p>
+            </div>
 
-            <span className="font-medium">ID TKU</span>
-            <span>{activeProfile.idTKU}</span>
+            <div>
+              <span className="block font-medium text-gray-700">ID TKU</span>
+              <p className="whitespace-normal break-words">
+                {activeProfile.idTKU}
+              </p>
+            </div>
           </div>
 
           {/* Link kembali */}
@@ -47,7 +61,7 @@ export function ProfilePreview() {
             className="flex items-center gap-2 text-sm font-medium text-primary hover:underline transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Kembali ke Beranda
+            Kembali ke Profil
           </Link>
         </CardContent>
       </Card>

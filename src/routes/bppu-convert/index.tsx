@@ -157,7 +157,8 @@ function RouteComponent() {
       const error = err as AxiosError;
       if (error.response) {
         console.log(error.response);
-        errorMessage("Bad Request!");
+        const resData = error.response.data as any;
+        errorMessage(`Bad Request! ${resData.error}`);
       } else {
         errorMessage("Unexpected Error!");
         console.log("No response received:", error.message);

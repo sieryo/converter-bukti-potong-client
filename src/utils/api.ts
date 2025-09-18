@@ -107,22 +107,21 @@ export async function validateBppu(bppu: BppuCoretax[]) {
   return result;
 }
 
-function _triggerDownload(response: any, ext: string = "xlsx") {
+function _triggerDownload(response: any) {
   const url = window.URL.createObjectURL(new Blob([response.data]));
-  const exportedName = response.headers.get("X-Exported-Filename");
+  const exportedFileName = response.headers.get("X-Exported-Filename");
 
-  let filename = `${exportedName}.xlsx`;
 
   const link = document.createElement("a");
   link.href = url;
-  link.setAttribute("download", filename);
+  link.setAttribute("download", exportedFileName);
   document.body.appendChild(link);
   link.click();
   link.remove();
 }
 
-export function triggerDownload(response: any, ext: string = "xlsx") {
-  _triggerDownload(response, ext);
+export function triggerDownload(response: any) {
+  _triggerDownload(response);
 }
 
 function handleErrorResponse(err: any) {
