@@ -57,12 +57,14 @@ function RouteComponent() {
   const handleConvert = useCallback(async () => {
     if (!bppuFiles || bppuFiles.length === 0) return;
 
+    setIsLoading(true);
     const allValid = bppuFiles.every((file) => file.status === "valid");
     if (!allValid) {
       errorMessage(
         "Masih ada file yang belum valid, silahkan validasi kembali"
       );
       console.warn("Masih ada yang belum valid");
+      setIsLoading(false);
       return;
     }
     const processingIds: string[] = [];
@@ -72,7 +74,6 @@ function RouteComponent() {
     });
 
     addFiles(processingIds);
-    setIsLoading(true);
 
     try {
       const response = await convertBppu(bppuFiles);

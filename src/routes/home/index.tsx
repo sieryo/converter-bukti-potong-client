@@ -2,8 +2,7 @@ import { ProfilePreview } from "@/components/ProfilePreview";
 import { BASE_API_PATH } from "@/lib/constants";
 import { Link } from "@tanstack/react-router";
 import { createFileRoute } from "@tanstack/react-router";
-import { FileCode2, FileText, Home } from "lucide-react";
-// import ProfilePreview from "@/components/ProfilePreview"; // asumsi ada
+import { FileCode2, FileText } from "lucide-react";
 
 export const Route = createFileRoute("/home/")({
   component: RouteComponent,
