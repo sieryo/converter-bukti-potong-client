@@ -23,8 +23,15 @@ import type { Header } from "@/lib/ExcelProcessor";
 
 /* ---------- CONFIG ---------- */
 const CLAUSES = [
-  { id: "empty_or_zero", label: "Kosong atau nol", needsValue: false },
-  { id: "not_empty", label: "Tidak Kosong", needsValue: false },
+  { id: "equals", label: "Sama dengan", needsValue: true, valueType: "text" },
+  {
+    id: "not_equals",
+    label: "Tidak sama dengan",
+    needsValue: true,
+    valueType: "text",
+  },
+  { id: "empty", label: "Kosong", needsValue: false },
+  { id: "not_empty", label: "Tidak kosong", needsValue: false },
   {
     id: "greater_than",
     label: "Lebih dari ...",
@@ -74,6 +81,8 @@ const ConditionForm = ({
 }: any) => {
   const fieldOptions = sourceType === "bukpot" ? bukpotOptions : profileOptions;
 
+  console.log
+
   return (
     <div className="p-4 border rounded-xl bg-gray-50 space-y-3">
       <span className="block text-xs uppercase text-gray-500 font-medium">
@@ -122,7 +131,7 @@ const ConditionForm = ({
 
       {/* Compare Type */}
       {selectedClause &&
-        ["greater_than", "less_equal"].includes(selectedClause) && (
+        ["greater_than", "less_equal", "equals", "not_equals"].includes(selectedClause) && (
           <div className="flex flex-wrap gap-2 items-center">
             <Select value={compareType} onValueChange={setCompareType}>
               <SelectTrigger className="w-[200px]">
@@ -137,7 +146,7 @@ const ConditionForm = ({
 
             {compareType === "set_value" && (
               <Input
-                type="number"
+                type="text"
                 placeholder="Masukkan nilai"
                 value={clauseValue}
                 onChange={(e) => setClauseValue(e.target.value)}
