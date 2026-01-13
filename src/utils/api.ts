@@ -124,7 +124,7 @@ export function triggerDownload(response: any) {
   _triggerDownload(response);
 }
 
-function handleErrorResponse(err: any) {
+export function handleErrorResponse(err: any) {
   if (
     err.response &&
     err.response.data instanceof Blob &&
@@ -146,3 +146,21 @@ function handleErrorResponse(err: any) {
     alert("err: " + (err.message || "Terjadi kesalahan"));
   }
 }
+
+export async function renameFiles(endpoint: string, files: File[]) {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append("files", file);
+  });
+
+  const response = await axios.post(`${BASE_API_PATH}/${endpoint}`, formData, {
+    responseType: "blob",
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  triggerDownload(response);
+  return response;
+}
+

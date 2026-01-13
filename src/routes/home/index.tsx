@@ -49,6 +49,19 @@ function RouteComponent() {
               Konversi file(s) PDF BPPU Coretax menjadi Rekap
             </p>
           </Link>
+
+          <Link
+            to="/rename-files"
+            className="group flex flex-col items-center justify-center rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-md hover:-translate-y-1"
+          >
+            <FileText className="mb-3 h-12 w-12 text-gray-600 transition-transform group-hover:scale-110" />
+            <h3 className="text-lg font-semibold text-gray-800 group-hover:text-gray-900">
+              Rename Files
+            </h3>
+            <p className="mt-1 text-sm text-gray-500 text-center">
+              Rename files tarikan dari coretax agar sesuai
+            </p>
+          </Link>
         </div>
       </div>
     </div>
