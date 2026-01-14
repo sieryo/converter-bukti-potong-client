@@ -36,7 +36,7 @@ export async function convertBukpot(
     return { response };
   } catch (err: any) {
     console.error("Upload error:", err);
-    handleErrorResponse(err);
+    await handleErrorResponse(err);
 
     const response = err?.response;
 
@@ -124,27 +124,33 @@ export function triggerDownload(response: any) {
   _triggerDownload(response);
 }
 
-export function handleErrorResponse(err: any) {
-  if (
-    err.response &&
-    err.response.data instanceof Blob &&
-    err.response.data.type === "application/json"
-  ) {
-    const reader = new FileReader();
-    reader.onload = function () {
-      const errorText = reader.result;
-      try {
-        // @ts-expect-error
-        const json = JSON.parse(errorText ?? "");
-        errorMessage(json.detail || "Unknown Error");
-      } catch (parseError) {
-        errorMessage("Error:" + errorText);
-      }
-    };
-    reader.readAsText(err.response.data);
-  } else {
-    alert("err: " + (err.message || "Terjadi kesalahan"));
-  }
+export function handleErrorResponse(err: any): Promise<any> {
+  return new Promise((resolve) => {
+    if (
+      err.response &&
+      err.response.data instanceof Blob &&
+      err.response.data.type === "application/json"
+    ) {
+      const reader = new FileReader();
+      reader.onload = function () {
+        const errorText = reader.result;
+        try {
+          // @ts-expect-error
+          const json = JSON.parse(errorText ?? "");
+          resolve(json)
+        } catch (parseError) {
+          resolve({
+            error: "Unknown Error"
+          })
+        }
+      };
+      reader.readAsText(err.response.data);
+    } else {
+      alert("err: " + (err.message || "Terjadi kesalahan"));
+
+      resolve("Unknown Error")
+    }
+  })
 }
 
 export async function renameFiles(endpoint: string, files: File[]) {

@@ -102,7 +102,7 @@ export default function FilesUploader({
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 className={cn(
-                    "border-2 border-dashed rounded-xl p-8 transition-all duration-200 ease-in-out cursor-pointer flex flex-col items-center justify-center text-center",
+                    " p-8 transition-all duration-200 ease-in-out cursor-pointer flex flex-col items-center justify-center text-center",
                     isDragging
                         ? "border-blue-500 bg-blue-50 scale-[1.01]"
                         : "border-gray-200 hover:border-blue-400 hover:bg-gray-50/50"
@@ -145,7 +145,7 @@ export default function FilesUploader({
                             Clear all
                         </button>
                     </div>
-                    <div className="grid gap-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                    <div className="grid gap-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar  p-2">
                         {internalFiles.map((file) => (
                             <div
                                 key={file.id}
