@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { Upload, FileText, X, AlertCircle } from "lucide-react";
+import { Upload, FileText, X } from "lucide-react";
 import { toast } from "sonner";
 import { generateUUID } from "@/utils/uuid";
 import { cn } from "@/lib/utils";

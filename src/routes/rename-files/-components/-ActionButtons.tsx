@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Loader2, Wand2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 interface ActionButtonsProps {
   onRename: () => void;

@@ -2,7 +2,6 @@ import type { Profile } from "@/store/useProfileStore";
 import type { ExportedRules } from "./rule";
 import axios, { type AxiosResponse } from "axios";
 import { BASE_API_PATH } from "@/lib/constants";
-import { errorMessage } from "./message";
 import type { BppuCoretax } from "@/types/bppu";
 
 export async function convertBukpot(
