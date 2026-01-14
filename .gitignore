@@ -5,5 +5,7 @@ dist-ssr
 *.local
 count.txt
 .env
+.env.production
+.env.development
 .nitro
 .tanstack

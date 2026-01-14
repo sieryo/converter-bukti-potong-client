@@ -27,7 +27,7 @@ export function TypeSelector({ options, selectedId, onSelect }: TypeSelectorProp
             <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-xs font-bold">1</span>
-                    Select Format
+                    Select Type
                 </h2>
                 <TooltipProvider>
                     <Tooltip>
@@ -35,7 +35,7 @@ export function TypeSelector({ options, selectedId, onSelect }: TypeSelectorProp
                             <Info className="w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors" />
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>Pilih format bukti potong</p>
+                            <p>Pilih tipe bukti potong</p>
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
