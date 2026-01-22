@@ -85,6 +85,10 @@ function RouteComponent() {
             toast.error("Please upload at least one PDF file.");
             return;
         }
+        if (files.length >= 1000) {
+            toast.error("Max 1000 files allowed per batch.");
+            return;
+        }
 
         const endpointConfig = ENDPOINTS.find((e) => e.id === selectedEndpoint);
         if (!endpointConfig) return;
@@ -171,7 +175,7 @@ function RouteComponent() {
                                 onRename={handleRename}
                                 onDownload={handleDownload}
                                 isLoading={localLoading}
-                                isDisabled={!selectedEndpoint || files.length === 0}
+                                isDisabled={!selectedEndpoint || files.length === 0 || files.length >= 1000}
                                 canDownload={jobStatus?.status === 'done'}
                             />
                         </div>
