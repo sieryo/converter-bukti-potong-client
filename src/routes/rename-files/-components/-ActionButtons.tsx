@@ -1,24 +1,31 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import { Loader2, Download } from "lucide-react";
 
 interface ActionButtonsProps {
   onRename: () => void;
+  onDownload?: () => void;
   isLoading: boolean;
   isDisabled: boolean;
-  fileCount: number;
+  canDownload?: boolean;
 }
 
-export function ActionButtons({ onRename, isLoading, isDisabled, fileCount }: ActionButtonsProps) {
+export function ActionButtons({ onRename, onDownload, isLoading, isDisabled, canDownload }: ActionButtonsProps) {
   return (
-    <div className="flex items-center justify-end pt-4 border-t border-gray-100 mt-6">
-      <div className="flex items-center gap-4 text-sm text-gray-500 mr-auto">
-        {fileCount > 0 && (
-          <span className="animate-in fade-in slide-in-from-left-2">
-            Ready to process <span className="font-semibold text-gray-900">{fileCount}</span> files
-          </span>
-        )}
-      </div>
+    <div className="flex items-center justify-end pt-4 border-t border-gray-100 mt-6 gap-3">
+
+
+      {canDownload && onDownload && (
+        <Button
+          size="lg"
+          variant="outline"
+          onClick={onDownload}
+          className="font-semibold h-12 rounded-xl text-base border-primary text-primary hover:bg-primary/5"
+        >
+          <Download className="w-5 h-5 mr-2" />
+          Download Result
+        </Button>
+      )}
 
       <Button
         size="lg"

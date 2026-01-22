@@ -3,6 +3,7 @@ import type { ExportedRules } from "./rule";
 import axios, { type AxiosResponse } from "axios";
 import { BASE_API_PATH } from "@/lib/constants";
 import type { BppuCoretax } from "@/types/bppu";
+import type { RenameJobStatus } from "@/types/job";
 
 export async function convertBukpot(
   bukpotFile: File,
@@ -159,13 +160,27 @@ export async function renameFiles(endpoint: string, files: File[]) {
   });
 
   const response = await axios.post(`${BASE_API_PATH}/${endpoint}`, formData, {
-    responseType: "blob",
     headers: {
       "Content-Type": "multipart/form-data",
     },
   });
 
-  triggerDownload(response);
-  return response;
+  return response.data; // { job_id: string }
+}
+
+export async function getRenameProgress(jobId: string): Promise<RenameJobStatus> {
+  const response = await axios.get(`${BASE_API_PATH}/progress/${jobId}`);
+  return response.data;
+}
+
+export function downloadRenameResult(jobId: string) {
+  const url = `${BASE_API_PATH}/download/${jobId}`;
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "");
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 }
 

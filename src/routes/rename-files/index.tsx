@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { handleErrorResponse, renameFiles } from "@/utils/api";
+import { useState, useEffect } from "react";
+import { handleErrorResponse, renameFiles, getRenameProgress, downloadRenameResult } from "@/utils/api";
 import { toast } from "sonner";
-import { useFullScreenLoadingStore } from "@/store/useFullScreenLoadingStore";
 import { FullscreenLoader } from "@/components/FullScreenLoader";
 import { errorMessage } from "@/utils/message";
 import { type FileItem } from "@/components/FilesUploader";
@@ -11,7 +10,8 @@ import { Header } from "./-components/-Header";
 import { TypeSelector, type EndpointOption } from "./-components/-TypeSelector";
 import { FileSection } from "./-components/-FileSection";
 import { ActionButtons } from "./-components/-ActionButtons";
-import { ProcessedResult } from "./-components/-ProcessedResult";
+import { ProgressStats } from "./-components/-ProgressStats";
+import type { RenameJobStatus } from "@/types/job";
 
 export const Route = createFileRoute("/rename-files/")({
     component: RouteComponent,
@@ -21,14 +21,14 @@ const ENDPOINTS: EndpointOption[] = [
     {
         id: "bppu",
         name: "Bukti Potong BPPU",
-        description: "[nama] - [nomor dokumen] - [masa pajak].pdf",
+        description: "[nomor dokumen] - [nama] - [masa pajak].pdf",
         icon: FileText,
         endpoint: "rename_bppu",
     },
     {
         id: "bp21",
         name: "Bukti Potong BP21",
-        description: "[nama] - [nomor dokumen] - [masa pajak].pdf",
+        description: "[nomor dokumen] - [nama] - [masa pajak].pdf",
         icon: FileText,
         endpoint: "rename_bp21",
     },
@@ -44,9 +44,37 @@ const ENDPOINTS: EndpointOption[] = [
 function RouteComponent() {
     const [selectedEndpoint, setSelectedEndpoint] = useState<string | null>(null);
     const [files, setFiles] = useState<FileItem[]>([]);
-    const { setIsLoading } = useFullScreenLoadingStore();
     const [localLoading, setLocalLoading] = useState(false);
-    const [resultStats, setResultStats] = useState<{ processed: number; skipped: number } | null>(null);
+
+    const [jobId, setJobId] = useState<string | null>(null);
+    const [jobStatus, setJobStatus] = useState<RenameJobStatus | null>(null);
+
+    useEffect(() => {
+        let intervalId: NodeJS.Timeout;
+
+        if (jobId && jobStatus?.status !== 'done' && jobStatus?.status !== 'error') {
+            intervalId = setInterval(async () => {
+                try {
+                    const status = await getRenameProgress(jobId);
+                    setJobStatus(status);
+
+                    if (status.status === 'done') {
+                        setLocalLoading(false);
+                        toast.success("Files renamed successfully!");
+                    } else if (status.status === 'error') {
+                        setLocalLoading(false);
+                        toast.error(status.error || "Processing failed");
+                    }
+                } catch (error) {
+                    console.error("Failed to poll status", error);
+                }
+            }, 1000);
+        }
+
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [jobId, jobStatus?.status]);
 
     const handleRename = async () => {
         if (!selectedEndpoint) {
@@ -62,32 +90,42 @@ function RouteComponent() {
         if (!endpointConfig) return;
 
         try {
-            setIsLoading(true);
             setLocalLoading(true);
-            setResultStats(null);
+            setJobStatus(null);
+            setJobId(null);
 
             const rawFiles = files.map((f) => f.file);
             const response = await renameFiles(endpointConfig.endpoint, rawFiles);
 
-            const headers = response.headers as any;
-            const processedCount = headers.get ? Number(headers.get("X-Processed-Files")) : Number(headers["x-processed-files"] || 0);
-            const skippedCount = headers.get ? Number(headers.get("X-Skipped-Files")) : Number(headers["x-skipped-files"] || 0);
-
-            if (!isNaN(processedCount) || !isNaN(skippedCount)) {
-                setResultStats({
-                    processed: isNaN(processedCount) ? 0 : processedCount,
-                    skipped: isNaN(skippedCount) ? 0 : skippedCount
+            if (response.job_id) {
+                setJobId(response.job_id);
+                // Initialize status
+                setJobStatus({
+                    job_id: response.job_id,
+                    status: "queued",
+                    total_files: rawFiles.length,
+                    processed_files: 0,
+                    skipped_files: 0
                 });
+            } else {
+                toast.error("No Job ID received");
+                throw new Error("No Job ID received");
             }
 
-            toast.success("Files renamed successfully!");
         } catch (error) {
-            const err = await handleErrorResponse(error)
-            errorMessage(err.error || "Failed to rename files")
-            console.log(err)
-        } finally {
-            setIsLoading(false);
             setLocalLoading(false);
+            const err = await handleErrorResponse(error)
+            errorMessage(err.error || "Failed to initiate rename")
+            console.log(err)
+        }
+    };
+
+    const handleDownload = () => {
+        if (jobId) {
+            downloadRenameResult(jobId);
+            setJobId(null);
+            setJobStatus(null);
+            toast.success("Download started and state reset");
         }
     };
 
@@ -108,11 +146,17 @@ function RouteComponent() {
                             />
                         </div>
 
-                        {resultStats && (
-                            <ProcessedResult
-                                processedCount={resultStats.processed}
-                                skippedCount={resultStats.skipped}
-                            />
+                        {jobId && (
+                            <div className="p-4 bg-white rounded-lg border border-blue-200 shadow-sm mb-4">
+                                <p className="text-sm text-gray-500 font-medium uppercase tracking-wider mb-1">Job ID</p>
+                                <p className="font-mono text-gray-900 bg-gray-50 px-3 py-2 rounded border border-gray-100 select-all">
+                                    {jobId}
+                                </p>
+                            </div>
+                        )}
+
+                        {jobStatus && (
+                            <ProgressStats status={jobStatus} />
                         )}
                     </div>
 
@@ -125,9 +169,10 @@ function RouteComponent() {
 
                             <ActionButtons
                                 onRename={handleRename}
+                                onDownload={handleDownload}
                                 isLoading={localLoading}
                                 isDisabled={!selectedEndpoint || files.length === 0}
-                                fileCount={files.length}
+                                canDownload={jobStatus?.status === 'done'}
                             />
                         </div>
                     </div>
