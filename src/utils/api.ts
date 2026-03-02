@@ -5,6 +5,17 @@ import { BASE_API_PATH } from "@/lib/constants";
 import type { BppuCoretax } from "@/types/bppu";
 import type { RenameJobStatus } from "@/types/job";
 
+type RenameMode = "by_category" | "by_nama_pegawai";
+
+interface RenameFilesPayload {
+  endpoint: string;
+  files: File[];
+  state?: RenameMode;
+  mode?: RenameMode;
+  mappingFile?: File | null;
+  sheetName?: string;
+}
+
 export async function convertBukpot(
   bukpotFile: File,
   rules: ExportedRules,
@@ -153,13 +164,29 @@ export function handleErrorResponse(err: any): Promise<any> {
   })
 }
 
-export async function renameFiles(endpoint: string, files: File[]) {
+export async function renameFiles(payload: RenameFilesPayload) {
   const formData = new FormData();
-  files.forEach((file) => {
+  payload.files.forEach((file) => {
     formData.append("files", file);
   });
 
-  const response = await axios.post(`${BASE_API_PATH}/${endpoint}`, formData, {
+  if (payload.state) {
+    formData.append("state", payload.state);
+  }
+
+  if (payload.mode) {
+    formData.append("mode", payload.mode);
+  }
+
+  if (payload.mappingFile) {
+    formData.append("mapping_file", payload.mappingFile);
+  }
+
+  if (payload.sheetName?.trim()) {
+    formData.append("sheet_name", payload.sheetName.trim());
+  }
+
+  const response = await axios.post(`${BASE_API_PATH}/${payload.endpoint}`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -173,14 +200,35 @@ export async function getRenameProgress(jobId: string): Promise<RenameJobStatus>
   return response.data;
 }
 
-export function downloadRenameResult(jobId: string) {
-  const url = `${BASE_API_PATH}/download/${jobId}`;
+function getFileNameFromDisposition(disposition: string | null) {
+  if (!disposition) return null;
+  const utf8Match = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) {
+    return decodeURIComponent(utf8Match[1]);
+  }
 
+  const basicMatch = disposition.match(/filename="?([^"]+)"?/i);
+  if (basicMatch?.[1]) {
+    return basicMatch[1];
+  }
+  return null;
+}
+
+export async function downloadRenameResult(jobId: string) {
+  const response = await axios.get(`${BASE_API_PATH}/download/${jobId}`, {
+    responseType: "blob",
+  });
+
+  const fileName =
+    getFileNameFromDisposition(response.headers["content-disposition"]) ??
+    "renamed_files.zip";
+  const url = window.URL.createObjectURL(new Blob([response.data]));
   const link = document.createElement("a");
   link.href = url;
-  link.setAttribute("download", "");
+  link.setAttribute("download", fileName);
   document.body.appendChild(link);
   link.click();
   link.remove();
+  window.URL.revokeObjectURL(url);
 }
 

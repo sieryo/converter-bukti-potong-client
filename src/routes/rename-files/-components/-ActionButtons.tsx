@@ -8,9 +8,17 @@ interface ActionButtonsProps {
   isLoading: boolean;
   isDisabled: boolean;
   canDownload?: boolean;
+  renameLabel?: string;
 }
 
-export function ActionButtons({ onRename, onDownload, isLoading, isDisabled, canDownload }: ActionButtonsProps) {
+export function ActionButtons({
+  onRename,
+  onDownload,
+  isLoading,
+  isDisabled,
+  canDownload,
+  renameLabel = "Rename Files",
+}: ActionButtonsProps) {
   return (
     <div className="flex items-center justify-end pt-4 border-t border-gray-100 mt-6 gap-3">
 
@@ -20,7 +28,7 @@ export function ActionButtons({ onRename, onDownload, isLoading, isDisabled, can
           size="lg"
           variant="outline"
           onClick={onDownload}
-          className="font-semibold h-12 rounded-xl text-base border-primary text-primary hover:bg-primary/5"
+          className="font-semibold h-12 rounded-xl text-base border-emerald-500 text-emerald-700 hover:bg-emerald-50"
         >
           <Download className="w-5 h-5 mr-2" />
           Download Result
@@ -35,7 +43,7 @@ export function ActionButtons({ onRename, onDownload, isLoading, isDisabled, can
           "relative font-semibold transition-all duration-300 min-w-[160px] h-12 rounded-xl text-base",
           isDisabled
             ? "bg-gray-100 text-gray-400 hover:bg-gray-100"
-            : "",
+            : "bg-emerald-700 text-white hover:bg-emerald-800",
           isLoading && "cursor-wait"
         )}
       >
@@ -46,7 +54,7 @@ export function ActionButtons({ onRename, onDownload, isLoading, isDisabled, can
           </>
         ) : (
           <>
-            Rename Files
+            {renameLabel}
           </>
         )}
       </Button>

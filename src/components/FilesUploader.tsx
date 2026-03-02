@@ -102,10 +102,10 @@ export default function FilesUploader({
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 className={cn(
-                    " p-8 transition-all duration-200 ease-in-out cursor-pointer flex flex-col items-center justify-center text-center",
+                    "border-2 border-dashed rounded-xl p-8 transition-all duration-200 ease-in-out cursor-pointer flex flex-col items-center justify-center text-center",
                     isDragging
-                        ? "border-blue-500 bg-blue-50 scale-[1.01]"
-                        : "border-gray-200 hover:border-blue-400 hover:bg-gray-50/50"
+                        ? "border-emerald-500 bg-emerald-50 scale-[1.01]"
+                        : "border-gray-200 hover:border-emerald-400 hover:bg-emerald-50/40"
                 )}
             >
                 <input
@@ -119,11 +119,11 @@ export default function FilesUploader({
                 <label htmlFor="file-upload" className="w-full h-full cursor-pointer flex flex-col items-center">
                     <div className={cn(
                         "p-4 rounded-full mb-4 transition-colors",
-                        isDragging ? "bg-blue-100" : "bg-gray-100"
+                        isDragging ? "bg-emerald-100" : "bg-gray-100"
                     )}>
                         <Upload className={cn(
                             "w-8 h-8",
-                            isDragging ? "text-blue-600" : "text-gray-400"
+                            isDragging ? "text-emerald-600" : "text-gray-400"
                         )} />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">{title}</h3>
