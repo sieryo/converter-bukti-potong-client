@@ -17,7 +17,7 @@ export function ProcessedResult({ processedCount, skippedCount }: ProcessedResul
 
             <div className="grid grid-cols-1 gap-3">
                 <div className={cn(
-                    "p-4 rounded-xl border flex items-center justify-between transition-all duration-300",
+                    "p-4 bg-white rounded-xl border flex items-center justify-between transition-all duration-300",
                     "bg-gray-50/50 border-gray-200 text-gray-900"
                 )}>
                     <div className="flex items-center gap-3">

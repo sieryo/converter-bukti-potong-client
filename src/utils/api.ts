@@ -219,7 +219,11 @@ export async function downloadRenameResult(jobId: string) {
     responseType: "blob",
   });
 
+  const exportedFileName =
+    response.headers["x-exported-filename"] ??
+    response.headers["X-Exported-Filename"];
   const fileName =
+    exportedFileName ??
     getFileNameFromDisposition(response.headers["content-disposition"]) ??
     "renamed_files.zip";
   const url = window.URL.createObjectURL(new Blob([response.data]));

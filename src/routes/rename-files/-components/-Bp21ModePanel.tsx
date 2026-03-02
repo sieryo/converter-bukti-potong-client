@@ -44,7 +44,7 @@ export function Bp21ModePanel({
   const isByPegawai = mode === "by_nama_pegawai";
 
   return (
-    <div className="rounded-2xl border border-emerald-200/80 bg-gradient-to-b from-emerald-50 via-white to-white p-5 space-y-4">
+    <div className="rounded-2xl border border-emerald-200/80 bg-white p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
           <span className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
@@ -115,9 +115,11 @@ export function Bp21ModePanel({
               type="file"
               accept=".xlsx,.xlsm,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12"
               disabled={disabled}
-              onChange={(event) =>
-                onMappingFileChange(event.target.files?.[0] ?? null)
-              }
+              onChange={(event) => {
+                onMappingFileChange(event.target.files?.[0] ?? null);
+                // Reset native file input value so selecting the same file triggers onChange.
+                event.currentTarget.value = "";
+              }}
               className="bg-white"
             />
             {mappingFile && (
@@ -153,7 +155,7 @@ export function Bp21ModePanel({
                 sheetOptions.length === 0
               }
             >
-              <SelectTrigger id="rename-sheet-name" className="bg-white">
+              <SelectTrigger id="rename-sheet-name" className="w-full bg-white">
                 <SelectValue
                   placeholder={
                     sheetOptionsLoading
@@ -162,7 +164,7 @@ export function Bp21ModePanel({
                   }
                 />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="">
                 {sheetOptions.map((sheet) => (
                   <SelectItem key={sheet} value={sheet}>
                     {sheet}

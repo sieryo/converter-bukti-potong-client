@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 
 export function Header() {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-gradient-to-r from-white via-emerald-50/60 to-cyan-50/50 px-5 py-6 md:px-7 md:py-7 shadow-sm">
+    <div className="rounded-2xl border border-gray-200 bg-white px-5 py-6 md:px-7 md:py-7 shadow-sm">
 
       <div className="flex items-start gap-4">
         <Link
