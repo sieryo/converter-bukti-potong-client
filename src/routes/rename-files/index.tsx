@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { FullscreenLoader } from "@/components/FullScreenLoader";
 import { errorMessage } from "@/utils/message";
 import { type FileItem } from "@/components/FilesUploader";
-import { ClipboardCopy, FileText, TimerReset } from "lucide-react";
+import { FileText, TimerReset } from "lucide-react";
 import { Header } from "./-components/-Header";
 import { TypeSelector, type EndpointOption } from "./-components/-TypeSelector";
 import { FileSection } from "./-components/-FileSection";
@@ -19,7 +19,6 @@ import { ProgressStats } from "./-components/-ProgressStats";
 import { ProcessedResult } from "./-components/-ProcessedResult";
 import { Bp21ModePanel } from "./-components/-Bp21ModePanel";
 import type { RenameJobStatus } from "@/types/job";
-import { Button } from "@/components/ui/button";
 import * as XLSX from "xlsx";
 
 export const Route = createFileRoute("/rename-files/")({
@@ -198,16 +197,6 @@ function RouteComponent() {
         const err = await handleErrorResponse(error);
         errorMessage(err.error || "Failed to download result");
       }
-    }
-  };
-
-  const copyJobId = async () => {
-    if (!jobId) return;
-    try {
-      await navigator.clipboard.writeText(jobId);
-      toast.success("Job ID copied");
-    } catch {
-      toast.error("Clipboard not available");
     }
   };
 
