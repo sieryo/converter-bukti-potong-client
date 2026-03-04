@@ -105,7 +105,7 @@ export const RowRuleDialog: React.FC<RowRuleDialogProps> = ({
 
   return (
     <Dialog onOpenChange={setIsOpen} open={isOpen}>
-      <DialogContent className="max-w-2xl rounded-2xl shadow-lg">
+      <DialogContent className="max-w-2xl rounded-lg shadow-lg">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">
             Aturan Filter Row
@@ -140,7 +140,7 @@ export const RowRuleDialog: React.FC<RowRuleDialogProps> = ({
           <h3 className="text-sm font-medium text-gray-600">
             Tambah Filter Baru
           </h3>
-          <div className="p-4 border rounded-xl bg-gray-50 space-y-3">
+          <div className="p-4 border rounded-md bg-gray-50 space-y-3">
             <span className="block text-xs uppercase text-gray-500 font-medium">
               Kondisi Filter (WHEN)
             </span>
@@ -299,3 +299,4 @@ export const RowRuleDialog: React.FC<RowRuleDialogProps> = ({
     </Dialog>
   );
 };
+

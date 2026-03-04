@@ -4,23 +4,22 @@ import { Link } from "@tanstack/react-router";
 
 export function Header() {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white px-5 py-6 md:px-7 md:py-7 shadow-sm">
-
+    <div className="panel px-5 py-6 md:px-7 md:py-7 motion-rise">
       <div className="flex items-start gap-4">
         <Link
           to="/home"
-          className="mt-1.5 p-2 -ml-2 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-white transition-all duration-200"
+          className="-ml-2 mt-1.5 rounded-md p-2 text-zinc-500 transition-all duration-200 hover:bg-zinc-100 hover:text-zinc-900"
           aria-label="Kembali"
         >
           <ArrowLeft className="w-6 h-6" />
         </Link>
 
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
+          <h1 className="font-tiempos text-3xl text-zinc-900 md:text-4xl">
             Batch Rename Files
           </h1>
-          <p className="text-gray-600 mt-1.5 text-sm md:text-base leading-relaxed max-w-2xl">
-            pilih jenis dokumen, upload PDF, monitor progress real-time, dan
+          <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-zinc-600 md:text-base">
+            Pilih jenis dokumen, upload PDF, monitor progress real-time, lalu
             download hasil zip.
           </p>
         </div>
@@ -28,3 +27,4 @@ export function Header() {
     </div>
   );
 }
+

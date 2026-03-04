@@ -11,38 +11,38 @@ export function ProcessedResult({ processedCount, skippedCount }: ProcessedResul
 
     return (
         <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider pl-1">
+            <h3 className="pl-1 text-sm font-semibold uppercase tracking-wider text-zinc-500">
                 Processing Result
             </h3>
 
             <div className="grid grid-cols-1 gap-3">
                 <div className={cn(
-                    "p-4 bg-white rounded-xl border flex items-center justify-between transition-all duration-300",
-                    "bg-gray-50/50 border-gray-200 text-gray-900"
+                    "flex items-center justify-between rounded-md border p-4 transition-all duration-300",
+                    "border-zinc-300/70 bg-zinc-50/70 text-zinc-900"
                 )}>
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-white border border-gray-100 rounded-lg text-gray-700 shadow-sm">
+                        <div className="rounded-lg border border-zinc-300 bg-zinc-100 p-2 text-zinc-700 shadow-sm">
                             <CheckCircle2 className="w-5 h-5" />
                         </div>
                         <div>
                             <p className="font-semibold text-lg tabular-nums tracking-tight">{processedCount}</p>
-                            <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Renamed</p>
+                            <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Renamed</p>
                         </div>
                     </div>
                 </div>
 
                 {skippedCount > 0 && (
                     <div className={cn(
-                        "p-4 rounded-xl border flex items-center justify-between transition-all duration-300",
-                        "bg-gray-50/50 border-gray-200 text-gray-900"
+                        "flex items-center justify-between rounded-md border p-4 transition-all duration-300",
+                        "border-zinc-300/70 bg-zinc-50/70 text-zinc-900"
                     )}>
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white border border-gray-100 rounded-lg text-gray-700 shadow-sm">
+                            <div className="rounded-lg border border-zinc-300 bg-zinc-100 p-2 text-zinc-700 shadow-sm">
                                 <AlertCircle className="w-5 h-5" />
                             </div>
                             <div>
                                 <p className="font-semibold text-lg tabular-nums tracking-tight">{skippedCount}</p>
-                                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Skipped</p>
+                                <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Skipped</p>
                             </div>
                         </div>
                     </div>
@@ -51,3 +51,4 @@ export function ProcessedResult({ processedCount, skippedCount }: ProcessedResul
         </div>
     );
 }
+

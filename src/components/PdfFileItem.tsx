@@ -31,20 +31,24 @@ export function PdfFileItem({ file, onDelete }: PdfFileItemProps) {
     { bg: string; border: string; text: string }
   > = {
     pending: {
-      bg: "bg-gray-50",
-      border: "border-gray-300",
-      text: "text-gray-700",
+      bg: "bg-zinc-50/80",
+      border: "border-zinc-300/80",
+      text: "text-zinc-700",
     },
     valid: {
-      bg: "bg-green-50",
-      border: "border-green-300",
-      text: "text-green-700",
+      bg: "bg-zinc-100/65",
+      border: "border-zinc-400/70",
+      text: "text-zinc-800",
     },
-    error: { bg: "bg-red-50", border: "border-red-300", text: "text-red-700" },
+    error: {
+      bg: "bg-zinc-200/50",
+      border: "border-zinc-500/70",
+      text: "text-zinc-800",
+    },
     processing: {
-      bg: "bg-orange-50",
-      border: "border-orange-300",
-      text: "text-orange-700",
+      bg: "bg-zinc-100/75",
+      border: "border-zinc-400/80",
+      text: "text-zinc-700",
     },
   };
 
@@ -74,16 +78,16 @@ export function PdfFileItem({ file, onDelete }: PdfFileItemProps) {
   }, [highlightedId, file.id, setHighlighted]);
 
   const highlightClass =
-    highlightedId === file.id ? "ring-2 ring-rose-400 border-rose-400" : "";
+    highlightedId === file.id ? "ring-2 ring-zinc-500 border-zinc-500" : "";
 
   return (
     <li
       ref={itemRef}
-      className={`rounded-lg shadow-sm transition border ${border} ${bg} ${highlightClass}`}
+      className={`rounded-lg border shadow-sm transition ${border} ${bg} ${highlightClass}`}
     >
       <div className="flex items-center justify-between p-3">
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1 px-2 py-0.5 text-xs font-semibold bg-rose-500/70 text-white rounded-full shadow-sm">
+          <span className="flex items-center gap-1 rounded-full border border-zinc-300/80 bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-700 shadow-sm">
             <FileType2 className="w-3 h-3" />
             PDF
           </span>
@@ -97,12 +101,12 @@ export function PdfFileItem({ file, onDelete }: PdfFileItemProps) {
           <button
             type="button"
             onClick={() => setExpanded(!expanded)}
-            className="p-1 rounded-md hover:bg-gray-100 transition"
+            className="rounded-md p-1 transition hover:bg-zinc-200/70"
           >
             {expanded ? (
-              <ChevronDown className="w-4 h-4 text-gray-500" />
+              <ChevronDown className="w-4 h-4 text-zinc-500" />
             ) : (
-              <ChevronRight className="w-4 h-4 text-gray-500" />
+              <ChevronRight className="w-4 h-4 text-zinc-500" />
             )}
           </button>
         </div>
@@ -111,22 +115,22 @@ export function PdfFileItem({ file, onDelete }: PdfFileItemProps) {
       {expanded && (
         <div className="px-8 pb-3 space-y-2">
           {statusToUse === "valid" && file.data?.nomorBukpot && (
-            <div className="flex items-center gap-2 text-sm bg-green-100 border border-green-200 rounded-md px-2 py-1 text-green-700">
-              <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+            <div className="flex items-center gap-2 rounded-md border border-zinc-400/70 bg-zinc-100 px-2 py-1 text-sm text-zinc-700">
+              <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-zinc-600" />
               <span>Nomor Bukti Potong: {file.data.nomorBukpot}</span>
             </div>
           )}
 
           {statusToUse === "pending" && (
-            <div className="flex items-center gap-2 text-sm bg-gray-100 border border-gray-200 rounded-md px-2 py-1 text-gray-600">
-              <Clock className="w-4 h-4 text-gray-500 flex-shrink-0" />
+            <div className="flex items-center gap-2 rounded-md border border-zinc-300/80 bg-zinc-100/70 px-2 py-1 text-sm text-zinc-600">
+              <Clock className="w-4 h-4 flex-shrink-0 text-zinc-500" />
               <span>Menunggu validasi..</span>
             </div>
           )}
 
           {statusToUse === "processing" && (
-            <div className="flex items-center gap-2 text-sm bg-orange-100 border border-orange-200 rounded-md px-2 py-1 text-orange-700">
-              <Clock className="w-4 h-4 text-orange-500 flex-shrink-0" />
+            <div className="flex items-center gap-2 rounded-md border border-zinc-400/80 bg-zinc-100 px-2 py-1 text-sm text-zinc-700">
+              <Clock className="w-4 h-4 flex-shrink-0 text-zinc-600" />
               <span>Memproses...</span>
             </div>
           )}
@@ -135,18 +139,18 @@ export function PdfFileItem({ file, onDelete }: PdfFileItemProps) {
             file.errors?.map((err, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-2 text-sm bg-red-100 border border-red-200 rounded-md px-2 py-1 text-red-700 cursor-pointer hover:bg-red-200/70"
+                className="flex cursor-pointer items-start gap-2 rounded-md border border-zinc-500/70 bg-zinc-200/70 px-2 py-1 text-sm text-zinc-800 hover:bg-zinc-200"
                 onClick={() => {
                   if (err.linkToId) {
                     setHighlighted(err.linkToId);
                   }
                 }}
               >
-                <XCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                <XCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-zinc-700" />
                 <div className="flex flex-col">
                   <span>{err.message}</span>
                   {err.name && (
-                    <span className="text-xs text-gray-600">
+                    <span className="text-xs text-zinc-600">
                       File: {err.name}
                     </span>
                   )}

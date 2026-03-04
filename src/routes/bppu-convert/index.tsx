@@ -181,8 +181,9 @@ function RouteComponent() {
   }
 
   return (
-    <div className="h-screen p-4 flex flex-col">
-      <div className="grid grid-cols-3 gap-4 h-full">
+    <div className="app-page">
+      <div className="page-shell h-[calc(100vh-4rem)]">
+        <div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-3">
         <PdfFileList files={bppuFiles} onDelete={handleDeleteFile} />
         <ActionsPanel
           onUpload={handleUploadFiles}
@@ -191,6 +192,7 @@ function RouteComponent() {
           onConvert={handleConvert}
           onExport={() => console.log("Export")}
         />
+        </div>
       </div>
     </div>
   );

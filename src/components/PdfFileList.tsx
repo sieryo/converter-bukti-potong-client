@@ -12,20 +12,19 @@ export function PdfFileList({ files, onDelete }: PdfFileListProps) {
   const errorCount = files.filter((f) => f.status === "error").length;
 
   return (
-    <div className="col-span-2 border rounded-lg shadow-sm p-4 flex flex-col overflow-y-auto">
-      {/* Progress cards */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="flex flex-col items-center justify-center rounded-lg border border-gray-300 bg-gray-100/60 p-2.5">
-          <span className="text-lg font-bold text-gray-700">{pendingCount}</span>
-          <span className="text-xs text-gray-700">Pending</span>
+    <div className="panel col-span-2 flex flex-col overflow-y-auto p-4 motion-rise">
+      <div className="mb-6 grid grid-cols-3 gap-3">
+        <div className="panel-soft flex flex-col items-center justify-center p-2.5">
+          <span className="text-lg font-bold text-zinc-700">{pendingCount}</span>
+          <span className="text-xs text-zinc-600">Pending</span>
         </div>
-        <div className="flex flex-col items-center justify-center rounded-lg border border-green-300 bg-green-100/60 p-2.5">
-          <span className="text-lg font-bold text-green-700">{validCount}</span>
-          <span className="text-xs text-green-700">Valid</span>
+        <div className="panel-soft flex flex-col items-center justify-center p-2.5">
+          <span className="text-lg font-bold text-zinc-700">{validCount}</span>
+          <span className="text-xs text-zinc-600">Valid</span>
         </div>
-        <div className="flex flex-col items-center justify-center rounded-lg border border-red-300 bg-red-100/60 p-2.5">
-          <span className="text-lg font-bold text-red-700">{errorCount}</span>
-          <span className="text-xs text-red-700">Error</span>
+        <div className="panel-soft flex flex-col items-center justify-center p-2.5">
+          <span className="text-lg font-bold text-zinc-700">{errorCount}</span>
+          <span className="text-xs text-zinc-600">Error</span>
         </div>
       </div>
 

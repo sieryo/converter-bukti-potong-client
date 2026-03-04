@@ -28,14 +28,14 @@ export const PdfItemOption = ({
       <DropdownMenuTrigger asChild>
         <button
           className={cn(
-            "p-1 text-gray-800 disabled:text-gray-400 group-hover:opacity-100 transition-opacity"
+            "p-1 text-zinc-700 transition-opacity group-hover:opacity-100 disabled:text-zinc-400"
           )}
           disabled={isLoading}
         >
           <EllipsisVertical className="w-4 h-4" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-white text-gray-900 shadow-md">
+      <DropdownMenuContent className="border-zinc-300 bg-zinc-50 text-zinc-900 shadow-md">
         {options.map((opt) => {
           if (!opt.isVisible) return null;
 

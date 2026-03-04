@@ -25,14 +25,14 @@ export function TypeSelector({ options, selectedId, onSelect }: TypeSelectorProp
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                    <span className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">1</span>
+                <h2 className="flex items-center gap-2 text-lg font-semibold text-zinc-900">
+                    <span className="step-chip">1</span>
                     Jenis Dokumen
                 </h2>
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger>
-                            <Info className="w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                            <Info className="h-4 w-4 text-zinc-400 transition-colors hover:text-zinc-600" />
                         </TooltipTrigger>
                         <TooltipContent>
                             <p>Pilih tipe bukti potong yang ingin di-rename</p>
@@ -50,25 +50,25 @@ export function TypeSelector({ options, selectedId, onSelect }: TypeSelectorProp
                             key={item.id}
                             onClick={() => onSelect(item.id)}
                             className={cn(
-                                "group relative p-4 rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden",
+                                "group soft-hover relative cursor-pointer overflow-hidden rounded-md border p-4 transition-all duration-300",
                                 isSelected
-                                    ? "border-emerald-400 bg-gradient-to-r from-emerald-50 to-cyan-50 shadow-md ring-1 ring-emerald-500/30"
-                                    : "border-gray-200 bg-white hover:border-emerald-300 hover:shadow-md hover:bg-emerald-50/30"
+                                    ? "border-zinc-700 bg-zinc-900 text-zinc-50 shadow-md"
+                                    : "border-zinc-300/70 bg-zinc-50/80"
                             )}
                         >
                             <div
                                 className={cn(
                                     "absolute inset-y-0 left-0 w-1 transition-all",
-                                    isSelected ? "bg-emerald-500" : "bg-transparent group-hover:bg-emerald-300"
+                                    isSelected ? "bg-zinc-50/85" : "bg-transparent group-hover:bg-zinc-400/70"
                                 )}
                             />
                             <div className="flex items-start gap-4 relative z-10">
                                 <div
                                     className={cn(
-                                        "p-3 rounded-lg transition-all border duration-300 ",
+                                        "rounded-lg border p-3 transition-all duration-300 ",
                                         isSelected
-                                            ? "bg-emerald-600 text-white shadow-emerald-200"
-                                            : "bg-white text-gray-500 border border-gray-100 group-hover:text-emerald-600 group-hover:border-emerald-100"
+                                            ? "border-zinc-100/40 bg-zinc-800 text-zinc-100"
+                                            : "border-zinc-300/80 bg-zinc-100/80 text-zinc-600"
                                     )}
                                 >
                                     <Icon className="w-5 h-5" />
@@ -78,20 +78,20 @@ export function TypeSelector({ options, selectedId, onSelect }: TypeSelectorProp
                                         <h3
                                             className={cn(
                                                 "font-semibold text-base transition-colors",
-                                                isSelected ? "text-emerald-900" : "text-gray-900"
+                                                isSelected ? "text-zinc-50" : "text-zinc-900"
                                             )}
                                         >
                                             {item.name}
                                         </h3>
                                         {isSelected && (
-                                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800 animate-in fade-in zoom-in">
+                                            <span className="animate-in fade-in zoom-in inline-flex items-center rounded border border-zinc-100/20 bg-zinc-100/10 px-2 py-0.5 text-xs font-medium text-zinc-100">
                                                 Terpilih
                                             </span>
                                         )}
                                     </div>
                                     <p className={cn(
                                         "text-sm font-medium font-mono truncate transition-colors",
-                                        isSelected ? "text-emerald-700/90" : "text-gray-500"
+                                        isSelected ? "text-zinc-300" : "text-zinc-500"
                                     )}>
                                         {item.description}
                                     </p>
@@ -103,7 +103,7 @@ export function TypeSelector({ options, selectedId, onSelect }: TypeSelectorProp
                                         ? "opacity-100 translate-x-0"
                                         : "opacity-0 translate-x-4"
                                 )}>
-                                    <div className="bg-emerald-600 text-white p-1 rounded-full shadow-lg shadow-emerald-500/30">
+                                    <div className="rounded-full bg-zinc-100 p-1 text-zinc-900 shadow-sm">
                                         <Check className="w-3 h-3" />
                                     </div>
                                 </div>
@@ -115,3 +115,4 @@ export function TypeSelector({ options, selectedId, onSelect }: TypeSelectorProp
         </div>
     );
 }
+

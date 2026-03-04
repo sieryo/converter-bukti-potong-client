@@ -44,17 +44,15 @@ export function Bp21ModePanel({
   const isByPegawai = mode === "by_nama_pegawai";
 
   return (
-    <div className="rounded-2xl border border-emerald-200/80 bg-white p-5 space-y-4">
+    <div className="panel space-y-4 p-5 motion-rise motion-rise-delay-1">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
-            2
-          </span>
+        <h3 className="flex items-center gap-2 text-base font-semibold text-zinc-900">
+          <span className="step-chip">2</span>
           Mode Rename
         </h3>
         <Badge
           variant="outline"
-          className="border-emerald-200 text-emerald-700 bg-white"
+          className="border-zinc-400/70 bg-zinc-100/70 text-zinc-700"
         >
           {selectedDocumentLabel ?? "Pilih Dokumen"}
         </Badge>
@@ -66,18 +64,18 @@ export function Bp21ModePanel({
           disabled={disabled}
           onClick={() => onModeChange("by_category")}
           className={cn(
-            "text-left rounded-xl border p-4 transition-all",
+            "text-left rounded-md border p-4 transition-all",
             "disabled:opacity-60 disabled:cursor-not-allowed",
             mode === "by_category"
-              ? "border-emerald-400 bg-emerald-100/60 ring-1 ring-emerald-400/40"
-              : "border-gray-200 bg-white hover:border-emerald-300"
+              ? "border-zinc-800 bg-zinc-900 text-zinc-100 ring-1 ring-zinc-500/35"
+              : "border-zinc-300/70 bg-zinc-50/85 hover:border-zinc-400"
           )}
         >
-          <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-            <FolderTree className="w-4 h-4 text-emerald-700" />
+          <div className={cn("flex items-center gap-2 text-sm font-semibold", mode === "by_category" ? "text-zinc-100" : "text-zinc-900")}>
+            <FolderTree className="w-4 h-4" />
             By Category
           </div>
-          <p className="mt-1 text-xs text-gray-600">
+          <p className={cn("mt-1 text-xs", mode === "by_category" ? "text-zinc-300" : "text-zinc-600")}>
             Simpan output per kategori dokumen referensi.
           </p>
         </button>
@@ -87,27 +85,27 @@ export function Bp21ModePanel({
           disabled={disabled}
           onClick={() => onModeChange("by_nama_pegawai")}
           className={cn(
-            "text-left rounded-xl border p-4 transition-all",
+            "text-left rounded-md border p-4 transition-all",
             "disabled:opacity-60 disabled:cursor-not-allowed",
             mode === "by_nama_pegawai"
-              ? "border-emerald-400 bg-emerald-100/60 ring-1 ring-emerald-400/40"
-              : "border-gray-200 bg-white hover:border-emerald-300"
+              ? "border-zinc-800 bg-zinc-900 text-zinc-100 ring-1 ring-zinc-500/35"
+              : "border-zinc-300/70 bg-zinc-50/85 hover:border-zinc-400"
           )}
         >
-          <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-            <UserRound className="w-4 h-4 text-emerald-700" />
+          <div className={cn("flex items-center gap-2 text-sm font-semibold", mode === "by_nama_pegawai" ? "text-zinc-100" : "text-zinc-900")}>
+            <UserRound className="w-4 h-4" />
             By Nama Pegawai
           </div>
-          <p className="mt-1 text-xs text-gray-600">
+          <p className={cn("mt-1 text-xs", mode === "by_nama_pegawai" ? "text-zinc-300" : "text-zinc-600")}>
             Pakai lookup NIP - Nama dari file mapping Excel.
           </p>
         </button>
       </div>
 
       {isByPegawai && (
-        <div className="space-y-3 rounded-xl border border-emerald-200 bg-white/90 p-4">
+        <div className="space-y-3 rounded-md border border-zinc-300/70 bg-zinc-50/80 p-4">
           <div className="space-y-2">
-            <Label htmlFor="rename-mapping-file" className="text-gray-800">
+            <Label htmlFor="rename-mapping-file" className="text-zinc-800">
               Mapping File (.xlsx/.xlsm)
             </Label>
             <Input
@@ -120,19 +118,19 @@ export function Bp21ModePanel({
                 // Reset native file input value so selecting the same file triggers onChange.
                 event.currentTarget.value = "";
               }}
-              className="bg-white"
+              className="border-zinc-300 bg-zinc-50"
             />
             {mappingFile && (
-              <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+              <div className="flex items-center justify-between rounded-lg border border-zinc-300 bg-zinc-100 px-3 py-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <FileSpreadsheet className="w-4 h-4 text-emerald-700 shrink-0" />
-                  <p className="text-xs text-emerald-900 truncate">{mappingFile.name}</p>
+                  <FileSpreadsheet className="h-4 w-4 shrink-0 text-zinc-700" />
+                  <p className="truncate text-xs text-zinc-800">{mappingFile.name}</p>
                 </div>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-7 px-2 text-gray-600 hover:text-red-600 hover:bg-red-50"
+                  className="h-7 px-2 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900"
                   onClick={() => onMappingFileChange(null)}
                 >
                   <X className="w-4 h-4" />
@@ -142,7 +140,7 @@ export function Bp21ModePanel({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="rename-sheet-name" className="text-gray-800">
+            <Label htmlFor="rename-sheet-name" className="text-zinc-800">
               Sheet Name
             </Label>
             <Select
@@ -155,7 +153,7 @@ export function Bp21ModePanel({
                 sheetOptions.length === 0
               }
             >
-              <SelectTrigger id="rename-sheet-name" className="w-full bg-white">
+              <SelectTrigger id="rename-sheet-name" className="w-full border-zinc-300 bg-zinc-50">
                 <SelectValue
                   placeholder={
                     sheetOptionsLoading
@@ -172,7 +170,7 @@ export function Bp21ModePanel({
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-zinc-500">
               {mappingFile
                 ? "Pilih sheet dari file mapping yang diupload."
                 : "Upload file mapping terlebih dahulu."}
@@ -183,3 +181,4 @@ export function Bp21ModePanel({
     </div>
   );
 }
+

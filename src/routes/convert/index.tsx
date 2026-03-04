@@ -19,6 +19,7 @@ import {
   Play,
   CheckCircle,
   Circle,
+  Loader2,
 } from "lucide-react";
 import PromptAlertDialog from "@/components/PromptAlertDialog";
 import { handleExport } from "@/utils/helper";
@@ -34,7 +35,6 @@ import { FullscreenLoader } from "@/components/FullScreenLoader";
 import type { AxiosResponse } from "axios";
 import { DialogDetailExport } from "@/components/ConvertDetailDialog";
 import ProfileSwitcher from "@/components/ProfileSwitcher";
-import { BASE_API_PATH } from "@/lib/constants";
 import FileUploader from "@/components/FileUploader";
 
 export const Route = createFileRoute("/convert/")({
@@ -64,13 +64,10 @@ function RouteComponent() {
   const { getActiveProfile } = useProfileStore();
   const [bukpotFile, setBukpotFile] = useState<File | null>(null);
   const [rowStart, setRowStart] = useState<number | null>(null);
+  const [isReadingHeaders, setIsReadingHeaders] = useState(false);
   const { setIsLoading } = useFullScreenLoadingStore();
   const [response, setResponse] = useState<AxiosResponse<any, any>>();
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-
-  useEffect(() => {
-    console.log(BASE_API_PATH);
-  }, []);
 
   useEffect(() => {
     const loadTemplate = async () => {
@@ -84,10 +81,20 @@ function RouteComponent() {
   useEffect(() => {
     if (!bukpotFile || !rowStart) return;
     const loadExcel = async () => {
-      const bukpotProcessor = new ExcelProcessor(rowStart, bukpotFile);
-      await bukpotProcessor.load();
-      setBukpotOptions(bukpotProcessor.getHeader());
-      // console.log(bukpotProcessor.getHeader())
+      try {
+        setIsReadingHeaders(true);
+        setIsBukpotHeaderValid(BukpotHeaderState.PENDING);
+        const bukpotProcessor = new ExcelProcessor(rowStart, bukpotFile);
+        await bukpotProcessor.load();
+        setBukpotOptions(bukpotProcessor.getHeader());
+      } catch (error) {
+        console.error(error);
+        toast.error("Gagal membaca file bukti potong");
+        setBukpotOptions([]);
+        setIsBukpotHeaderValid(BukpotHeaderState.NOT_VALID);
+      } finally {
+        setIsReadingHeaders(false);
+      }
     };
     loadExcel();
   }, [bukpotFile, rowStart]);
@@ -109,6 +116,9 @@ function RouteComponent() {
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setRowStart(null);
+    setBukpotOptions([]);
+    setIsBukpotHeaderValid(BukpotHeaderState.PENDING);
     setBukpotFile(file);
   };
 
@@ -180,14 +190,21 @@ function RouteComponent() {
     isBukpotHeaderValid === BukpotHeaderState.PENDING
   ) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center text-center p-6">
-        <h2 className="text-lg font-semibold mb-2">Header baris ke-berapa?</h2>
+      <div className="app-page flex items-center justify-center">
+        <div className="panel w-full max-w-xl p-7 text-center motion-rise">
+        <h2 className="mb-2 font-tiempos text-2xl text-zinc-900">Header baris ke-berapa?</h2>
+        {isReadingHeaders && (
+          <div className="mb-3 inline-flex items-center gap-2 rounded-md border border-zinc-300 bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-700">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            Membaca header file...
+          </div>
+        )}
         {isBukpotHeaderValid === BukpotHeaderState.NOT_VALID && (
-          <p className="text-sm text-red-500 mb-4">
+          <p className="mb-4 text-sm text-zinc-700">
             Header tidak valid, biasanya file bukti potong akan ada:
             {REQUIRED_BUKPOT_HEADERS.map((h) => {
               return (
-                <span key={h} className=" block text-sm text-gray-700">
+                <span key={h} className="block text-sm text-zinc-700">
                   - {h}
                 </span>
               );
@@ -197,19 +214,21 @@ function RouteComponent() {
         <input
           type="number"
           min={1}
-          className="border rounded px-3 py-2 text-sm mb-4"
+          className="mb-4 rounded border border-zinc-300 bg-zinc-50 px-3 py-2 text-sm"
           placeholder="Contoh: 2"
+          disabled={isReadingHeaders}
           onChange={(e) => setRowStart(Number(e.target.value))}
         />
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-zinc-500">
           Web ini memerlukan data header bukti potong sebelum bisa memproses
         </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen p-4">
+    <div className="app-page">
       <DialogDetailExport
         isOpen={isDetailOpen}
         setIsOpen={setIsDetailOpen}
@@ -217,23 +236,27 @@ function RouteComponent() {
       />
       <FullscreenLoader />
 
-      <div className="w-full pb-3">
-        <h1 className=" text-xl">Converter Bukti Potong</h1>
+      <div className="page-shell h-[calc(100vh-4rem)] space-y-4">
+      <div className="panel px-5 py-4 motion-rise">
+        <h1 className="font-tiempos text-2xl text-zinc-900">Converter Bukti Potong</h1>
+        <p className="text-sm text-zinc-600">
+          Atur row filter dan mapping rule, lalu jalankan konversi.
+        </p>
       </div>
       <ResizablePanelGroup
         direction="horizontal"
-        className="w-full h-full rounded-lg border shadow-sm"
+        className="h-full w-full rounded-lg border border-zinc-300/70 shadow-sm"
       >
         <ResizablePanel defaultSize={70} minSize={40}>
-          <div className="p-4 flex flex-col gap-6 overflow-y-auto">
-            <div className="space-y-2">
-              <h2 className="text-lg font-semibold mb-2">Progress</h2>
+          <div className="p-4 flex flex-col gap-6 overflow-y-auto bg-zinc-50/70">
+            <div className="panel-soft space-y-2 p-4 motion-rise">
+              <h2 className="mb-2 text-lg font-semibold text-zinc-900">Progress</h2>
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   {bukpotOptions.length > 0 ? (
-                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <CheckCircle className="h-4 w-4 text-zinc-700" />
                   ) : (
-                    <Circle className="w-4 h-4 text-gray-400" />
+                    <Circle className="h-4 w-4 text-zinc-400" />
                   )}
                   <span>Header Bukti Potong terdeteksi</span>
                 </div>
@@ -243,7 +266,7 @@ function RouteComponent() {
                       setBukpotFile(null);
                       setRowStart(null);
                     }}
-                    className="text-xs text-blue-600 hover:underline cursor-pointer"
+                    className="cursor-pointer text-xs text-zinc-600 hover:underline"
                   >
                     Upload ulang
                   </label>
@@ -251,56 +274,53 @@ function RouteComponent() {
               </div>
               <div className="flex items-center gap-2 text-sm">
                 {rowFilters.length > 0 ? (
-                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <CheckCircle className="h-4 w-4 text-zinc-700" />
                 ) : (
-                  <Circle className="w-4 h-4 text-gray-400" />
+                  <Circle className="h-4 w-4 text-zinc-400" />
                 )}
                 <span>Row Filters dibuat</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 {fieldRules.some((r) => r.rules.length > 0) ? (
-                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <CheckCircle className="h-4 w-4 text-zinc-700" />
                 ) : (
-                  <Circle className="w-4 h-4 text-gray-400" />
+                  <Circle className="h-4 w-4 text-zinc-400" />
                 )}
                 <span>Header Field Rules ditentukan</span>
               </div>
             </div>
-          </div>
 
-          <div className=" p-4 flex flex-col gap-6 overflow-y-auto">
-            <div>
+            <div className="panel-soft p-4 motion-rise motion-rise-delay-1">
               <div className="flex justify-between items-center mb-2">
-                <h2 className="text-lg font-semibold">Bukpot Row Filters</h2>
+                <h2 className="text-lg font-semibold text-zinc-900">Bukpot Row Filters</h2>
                 <Button
                   size="sm"
                   variant="ghost"
+                  className="border border-zinc-300/80 bg-zinc-100 hover:bg-zinc-200"
                   onClick={() => setIsRowDialogOpen(true)}
                 >
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
               {rowFilters.length === 0 ? (
-                <p className="text-xs text-gray-500 italic">Belum ada filter</p>
+                <p className="text-xs italic text-zinc-500">Belum ada filter</p>
               ) : (
                 <ul className="space-y-1">
                   {rowFilters.map((f, idx) => (
                     <li
                       key={idx}
-                      className="flex items-center justify-between rounded bg-gray-50 px-2 py-1 text-sm"
+                      className="flex items-center justify-between rounded border border-zinc-300/60 bg-zinc-100/70 px-2 py-1 text-sm"
                     >
                       <span className="leading-relaxed">
-                        <span className="font-semibold text-gray-700">
+                        <span className="font-semibold text-zinc-700">
                           Include rows
-                        </span>{" "}
-                        from <span className="text-blue-600">{f.source}</span>{" "}
-                        <span className="font-semibold text-gray-700">
+                        </span>{" "}from <span className="text-zinc-900">{f.source}</span>{" "}
+                        <span className="font-semibold text-zinc-700">
                           where
-                        </span>{" "}
-                        <span className="text-blue-600">{f.field}</span>{" "}
-                        <span className="text-gray-700">{f.clause}</span>{" "}
+                        </span>{" "} <span className="text-zinc-900">{f.field}</span>{" "}
+                        <span className="text-zinc-700">{f.clause}</span>{" "}
                         {f.compareWith?.value && (
-                          <span className="text-green-600">
+                          <span className="text-zinc-900">
                             {f.compareWith.type} - {f.compareWith.value}
                           </span>
                         )}
@@ -313,16 +333,16 @@ function RouteComponent() {
                           removeFilter(idx);
                         }}
                       >
-                        <Trash2 className="h-4 w-4 text-red-500" />
+                        <Trash2 className="h-4 w-4 text-zinc-600" />
                       </PromptAlertDialog>
                     </li>
                   ))}
                 </ul>
               )}
             </div>
-          </div>
-          <div className="h-full p-4 flex flex-col gap-4 ">
-            <h2 className="text-lg font-semibold mb-2">
+
+            <div className="panel-soft h-full p-4 motion-rise motion-rise-delay-2">
+            <h2 className="mb-2 text-lg font-semibold text-zinc-900">
               Template Header Field Rules
             </h2>
             <div className="overflow-y-auto space-y-3 pb-[300px]">
@@ -341,13 +361,14 @@ function RouteComponent() {
                 return (
                   <Card
                     key={i}
-                    className="p-3 flex flex-col border rounded-lg shadow-sm"
+                    className="flex flex-col rounded-lg border-zinc-300/70 bg-zinc-50/80 p-3 shadow-sm"
                   >
                     <div className="flex justify-between items-center">
-                      <span className="font-medium">{h.name}</span>
+                      <span className="font-medium text-zinc-800">{h.name}</span>
                       <Button
                         size="sm"
                         variant="ghost"
+                        className="border border-zinc-300/80 bg-zinc-100 hover:bg-zinc-200"
                         onClick={() => {
                           setSelectedHeader(h);
                           setIsHeaderDialogOpen(true);
@@ -358,7 +379,7 @@ function RouteComponent() {
                     </div>
 
                     {rules.length === 0 ? (
-                      <p className="text-xs text-gray-500 mt-2 italic">
+                      <p className="mt-2 text-xs italic text-zinc-500">
                         Belum ada rule
                       </p>
                     ) : (
@@ -367,7 +388,7 @@ function RouteComponent() {
                           return (
                             <li
                               key={idx}
-                              className="flex items-center justify-between text-sm bg-gray-50 px-2 py-1 rounded"
+                              className="flex items-center justify-between rounded border border-zinc-300/60 bg-zinc-100/70 px-2 py-1 text-sm"
                             >
                               <RuleDescription rule={r} />
                               <PromptAlertDialog
@@ -375,7 +396,7 @@ function RouteComponent() {
                                 description="Rule yang dihapus tidak akan kembali dan harus dibuat lagi."
                                 onAction={() => removeRule(h.name, idx)}
                               >
-                                <Trash2 className="w-4 h-4 text-red-500" />
+                                <Trash2 className="h-4 w-4 text-zinc-600" />
                               </PromptAlertDialog>
                             </li>
                           );
@@ -386,19 +407,19 @@ function RouteComponent() {
                 );
               })}
             </div>
+            </div>
           </div>
         </ResizablePanel>
 
         <ResizableHandle />
 
-        {/* RIGHT: Actions */}
         <ResizablePanel defaultSize={30} minSize={20}>
-          <div className="h-full p-4 flex flex-col">
+          <div className="h-full p-4 flex flex-col bg-zinc-100/40">
             <div className="flex flex-col gap-4">
-              <h2 className="text-lg font-semibold mb-2">Aksi</h2>
+              <h2 className="mb-2 text-lg font-semibold text-zinc-900">Aksi</h2>
               <div className="flex flex-col gap-2">
                 <Button
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 bg-zinc-900 text-zinc-50 hover:bg-zinc-800"
                   onClick={handleConvert}
                 >
                   <Play className="w-4 h-4" /> Convert
@@ -411,7 +432,7 @@ function RouteComponent() {
                     handleExport(exportedRules);
                   }}
                   variant="outline"
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 border-zinc-400 bg-zinc-50 text-zinc-700 hover:bg-zinc-100"
                 >
                   <Download className="w-4 h-4" /> Export Rules
                 </Button>
@@ -424,8 +445,8 @@ function RouteComponent() {
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
+      </div>
 
-      {/* Dialogs */}
       {selectedHeader && (
         <HeaderRuleDialog
           isOpen={isHeaderDialogOpen}

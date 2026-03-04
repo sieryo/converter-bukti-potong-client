@@ -84,7 +84,7 @@ const ConditionForm = ({
   console.log
 
   return (
-    <div className="p-4 border rounded-xl bg-gray-50 space-y-3">
+    <div className="p-4 border rounded-md bg-gray-50 space-y-3">
       <span className="block text-xs uppercase text-gray-500 font-medium">
         Kondisi (WHEN)
       </span>
@@ -193,7 +193,7 @@ const ActionForm = ({
   const allowedFormats = ["date"];
 
   return (
-    <div className="p-4 border rounded-xl bg-gray-50 space-y-3">
+    <div className="p-4 border rounded-md bg-gray-50 space-y-3">
       <span className="block text-xs uppercase text-gray-500 font-medium">
         Aksi (THEN)
       </span>
@@ -406,7 +406,7 @@ export const HeaderRuleDialog: React.FC<{
 
   return (
     <Dialog onOpenChange={setIsOpen} open={isOpen}>
-      <DialogContent className="max-w-2xl rounded-2xl shadow-lg">
+      <DialogContent className="max-w-2xl rounded-lg shadow-lg">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">
             Aturan untuk <span className="text-primary">{header.name}</span>
@@ -475,3 +475,4 @@ export const HeaderRuleDialog: React.FC<{
     </Dialog>
   );
 };
+

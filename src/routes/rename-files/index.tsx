@@ -232,14 +232,14 @@ function RouteComponent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <div className="app-page">
       <FullscreenLoader />
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="page-shell max-w-6xl space-y-6">
         <Header />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
           <div className="lg:col-span-7 space-y-6">
-            <div className="bg-white p-6 rounded-2xl border border-gray-200/60 shadow-sm">
+            <div className="panel p-6 motion-rise motion-rise-delay-1">
               <TypeSelector
                 options={ENDPOINTS}
                 selectedId={selectedEndpoint}
@@ -262,13 +262,13 @@ function RouteComponent() {
             />
 
             {jobId && (
-              <div className="p-4 bg-white rounded-2xl border border-cyan-200 shadow-sm mb-4">
+              <div className="panel mb-4 p-4">
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <p className="text-sm text-gray-500 font-medium uppercase tracking-wider">
+                  <p className="text-sm text-zinc-500 font-medium uppercase tracking-wider">
                     Job ID
                   </p>
                 </div>
-                <p className="font-mono text-gray-900 bg-cyan-50 px-3 py-2 rounded-lg border border-cyan-100 select-all text-sm">
+                <p className="select-all rounded-lg border border-zinc-300/80 bg-zinc-100 px-3 py-2 font-mono text-sm text-zinc-900">
                   {jobId}
                 </p>
               </div>
@@ -278,13 +278,14 @@ function RouteComponent() {
           </div>
 
           <div className="lg:col-span-5 space-y-6">
-            <div className="bg-white p-6 rounded-2xl border border-gray-200/60 shadow-sm h-full flex flex-col">
+            <div className="panel flex h-full flex-col p-6 motion-rise motion-rise-delay-2">
               <FileSection
                 onFilesSelected={setFiles}
                 hasFiles={files.length > 0}
                 stepNumber={selectedEndpoint ? 3 : 2}
                 title="Drop PDF Bukti Potong"
                 description="Upload banyak file sekaligus. Maksimum 1000 file per batch."
+                isBusy={localLoading}
               />
 
               <ActionButtons
@@ -297,12 +298,12 @@ function RouteComponent() {
               />
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-white/80 backdrop-blur-sm p-5">
-              <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-                <TimerReset className="w-4 h-4 text-cyan-700" />
+            <div className="panel p-5">
+              <div className="flex items-center gap-2 text-sm font-semibold text-zinc-800">
+                <TimerReset className="h-4 w-4 text-zinc-600" />
                 Workflow
               </div>
-              <ol className="mt-3 space-y-1.5 text-sm text-gray-600 list-decimal pl-4">
+              <ol className="mt-3 list-decimal space-y-1.5 pl-4 text-sm text-zinc-600">
                 <li>Pilih tipe dokumen target.</li>
                 <li>Pilih mode rename (kategori atau nama pegawai).</li>
                 <li>Untuk mode pegawai, isi mapping file + sheet.</li>

@@ -41,12 +41,13 @@ export function ActionsPanel({
   };
 
   return (
-    <div className="border rounded-lg shadow-sm p-4 flex flex-col space-y-5">
-      <h2 className="text-lg font-semibold">Aksi</h2>
+    <div className="panel flex flex-col space-y-5 p-5 motion-rise">
+      <h2 className="font-tiempos text-2xl text-zinc-900">Aksi</h2>
 
-      {/* Upload Section */}
       <div className="space-y-2">
-        <h3 className="text-sm font-medium text-gray-600">Upload</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+          Upload
+        </h3>
         <label className="w-full">
           <input
             type="file"
@@ -57,7 +58,7 @@ export function ActionsPanel({
           />
           <Button
             variant="secondary"
-            className="flex items-center gap-2 w-full"
+            className="flex w-full items-center gap-2 border border-zinc-300/70 bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
             asChild
             disabled={isLoading}
           >
@@ -68,11 +69,12 @@ export function ActionsPanel({
         </label>
       </div>
 
-      {/* Pengecekan Section */}
       <div className="space-y-2">
-        <h3 className="text-sm font-medium text-gray-600">Pengecekan</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+          Pengecekan
+        </h3>
         <Button
-          className="flex items-center gap-2 w-full"
+          className="flex w-full items-center gap-2 border border-zinc-300/70 text-zinc-700 hover:bg-zinc-100"
           variant="ghost"
           onClick={onValidate}
           disabled={isLoading}
@@ -81,11 +83,12 @@ export function ActionsPanel({
         </Button>
       </div>
 
-      {/* Konversi & Export Section */}
       <div className="space-y-2">
-        <h3 className="text-sm font-medium text-gray-600">Konversi</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+          Konversi
+        </h3>
         <Button
-          className="flex items-center gap-2 w-full"
+          className="flex w-full items-center gap-2 bg-zinc-900 text-zinc-50 hover:bg-zinc-800"
           disabled={isLoading}
           onClick={onConvert}
         >
@@ -93,12 +96,13 @@ export function ActionsPanel({
         </Button>
       </div>
 
-      {/* Kembali Section */}
-      <div className="space-y-2 pt-2 border-t">
-        <h3 className="text-sm font-medium text-gray-600">Navigasi</h3>
+      <div className="space-y-2 border-t border-zinc-300/70 pt-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+          Navigasi
+        </h3>
         <Button
           variant="ghost"
-          className="flex items-center gap-2 w-full"
+          className="flex w-full items-center gap-2 border border-zinc-300/70 text-zinc-700 hover:bg-zinc-100"
           asChild
         >
           <Link to="/home" disabled={isLoading}>

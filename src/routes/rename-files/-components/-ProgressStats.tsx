@@ -17,24 +17,24 @@ export function ProgressStats({ status }: ProgressStatsProps) {
         : 0;
 
     return (
-        <div className="bg-white p-6 rounded-2xl border border-gray-200/60 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-                <h3 className="text-lg font-medium text-gray-900">Processing Status</h3>
+        <div className="panel space-y-4 p-6 motion-rise">
+            <div className="flex items-center justify-between border-b border-zinc-300/70 pb-4">
+                <h3 className="text-lg font-medium text-zinc-900">Processing Status</h3>
                 <div className="flex items-center gap-2">
                     {isProcessing && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800">
+                        <span className="inline-flex items-center rounded-full border border-zinc-400/70 bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-700">
                             <Loader2 className="w-3 h-3 mr-1 animate-spin" />
                             {status.status === "queued" ? "Queued" : "Processing"}
                         </span>
                     )}
                     {isDone && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span className="inline-flex items-center rounded-full border border-zinc-500 bg-zinc-900 px-2.5 py-0.5 text-xs font-medium text-zinc-50">
                             <CheckCircle className="w-3 h-3 mr-1" />
                             Done
                         </span>
                     )}
                     {isError && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        <span className="inline-flex items-center rounded-full border border-zinc-500 bg-zinc-200 px-2.5 py-0.5 text-xs font-medium text-zinc-800">
                             <XCircle className="w-3 h-3 mr-1" />
                             Error
                         </span>
@@ -43,40 +43,40 @@ export function ProgressStats({ status }: ProgressStatsProps) {
             </div>
 
             {status.error && (
-                <div className="p-4 bg-red-50 text-red-600 text-sm rounded-md border border-red-200">
+                <div className="rounded-md border border-zinc-400 bg-zinc-200/70 p-4 text-sm text-zinc-700">
                     {status.error}
                 </div>
             )}
 
             <div className="grid grid-cols-3 gap-4">
-                <div className="p-4 bg-slate-50 rounded-md border border-slate-200 text-center">
-                    <div className="text-sm text-gray-500 mb-1">Total Files</div>
-                    <div className="text-2xl font-semibold text-gray-900">{status.total_files}</div>
+                <div className="rounded-md border border-zinc-300/70 bg-zinc-100/70 p-4 text-center">
+                    <div className="mb-1 text-sm text-zinc-500">Total Files</div>
+                    <div className="text-2xl font-semibold text-zinc-900">{status.total_files}</div>
                 </div>
-                <div className="p-4 bg-emerald-50 rounded-md border border-emerald-100 text-center">
-                    <div className="text-sm text-green-600 mb-1">Processed</div>
-                    <div className="text-2xl font-semibold text-green-700">{status.processed_files}</div>
+                <div className="rounded-md border border-zinc-300/70 bg-zinc-100/70 p-4 text-center">
+                    <div className="mb-1 text-sm text-zinc-500">Processed</div>
+                    <div className="text-2xl font-semibold text-zinc-900">{status.processed_files}</div>
                 </div>
-                <div className="p-4 bg-amber-50 rounded-md border border-amber-100 text-center">
-                    <div className="text-sm text-amber-600 mb-1">Skipped</div>
-                    <div className="text-2xl font-semibold text-amber-700">{status.skipped_files}</div>
+                <div className="rounded-md border border-zinc-300/70 bg-zinc-100/70 p-4 text-center">
+                    <div className="mb-1 text-sm text-zinc-500">Skipped</div>
+                    <div className="text-2xl font-semibold text-zinc-900">{status.skipped_files}</div>
                 </div>
             </div>
 
             {status.total_files > 0 && (
                 <div className="relative pt-1">
                     <div className="flex mb-2 items-center justify-between">
-                        <div className="text-xs font-semibold inline-block text-cyan-700">
+                        <div className="inline-block text-xs font-semibold text-zinc-600">
                             Progress
                         </div>
-                        <div className="text-xs font-semibold inline-block text-cyan-700">
+                        <div className="inline-block text-xs font-semibold text-zinc-600">
                             {progress}%
                         </div>
                     </div>
-                    <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-cyan-100">
+                    <div className="mb-4 flex h-2 overflow-hidden rounded bg-zinc-300/70 text-xs">
                         <div
                             style={{ width: `${progress}%` }}
-                            className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-cyan-600 transition-all duration-500"
+                            className="flex flex-col justify-center whitespace-nowrap bg-zinc-800 text-center text-white shadow-none transition-all duration-500"
                         ></div>
                     </div>
                 </div>

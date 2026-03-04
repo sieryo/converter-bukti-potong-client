@@ -20,15 +20,14 @@ export function ActionButtons({
   renameLabel = "Rename Files",
 }: ActionButtonsProps) {
   return (
-    <div className="flex items-center justify-end pt-4 border-t border-gray-100 mt-6 gap-3">
-
+    <div className="mt-6 flex items-center justify-end gap-3 border-t border-zinc-300/70 pt-4">
 
       {canDownload && onDownload && (
         <Button
           size="lg"
           variant="outline"
           onClick={onDownload}
-          className="font-semibold h-12 rounded-xl text-base border-emerald-500 text-emerald-700 hover:bg-emerald-50"
+          className="h-12 rounded-md border-zinc-400 text-base font-semibold text-zinc-700 hover:bg-zinc-100"
         >
           <Download className="w-5 h-5 mr-2" />
           Download Result
@@ -40,10 +39,10 @@ export function ActionButtons({
         onClick={onRename}
         disabled={isDisabled || isLoading}
         className={cn(
-          "relative font-semibold transition-all duration-300 min-w-[160px] h-12 rounded-xl text-base",
+          "relative font-semibold transition-all duration-300 min-w-[160px] h-12 rounded-md text-base",
           isDisabled
-            ? "bg-gray-100 text-gray-400 hover:bg-gray-100"
-            : "bg-emerald-700 text-white hover:bg-emerald-800",
+            ? "bg-zinc-200 text-zinc-500 hover:bg-zinc-200"
+            : "bg-zinc-900 text-zinc-50 hover:bg-zinc-800",
           isLoading && "cursor-wait"
         )}
       >
@@ -61,3 +60,4 @@ export function ActionButtons({
     </div>
   );
 }
+
